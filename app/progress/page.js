@@ -15,15 +15,6 @@ import {
 } from "../lib/hardcore";
 import { recommendShift } from "../lib/shiftApi";
 
-const spiritNames = {
-  spark: "ธูติประกายไฟ",
-  mist: "ธูติหมอกนุ่ม",
-  sprout: "ธูติต้นกล้า",
-  water: "ธูติน้ำใจ",
-  wind: "ธูติลมเย็น",
-  light: "ธูติแสงดาว"
-};
-
 const slotLabels = {
   morning: "ตอนเช้า",
   "after-work": "หลังเลิกงาน",
@@ -115,18 +106,20 @@ export default function ProgressPage() {
         </div>
 
         <section className="progress-card">
-          <p className="tiny-label">Local Name + ธูติ</p>
+          <p className="tiny-label">บริบทตอนนี้ / current state</p>
           <div className="progress-inline">
-            <input
-              type="text"
-              value={localNameDraft}
-              placeholder="ตั้งชื่อเรียกตัวเอง"
-              onChange={(event) => setLocalNameDraft(event.target.value)}
-              onBlur={saveLocalName}
-            />
+            <label className="progress-field">
+              <span>ชื่อ / Name</span>
+              <input
+                type="text"
+                value={localNameDraft}
+                placeholder="ตั้งชื่อ"
+                onChange={(event) => setLocalNameDraft(event.target.value)}
+                onBlur={saveLocalName}
+              />
+            </label>
             <button type="button" onClick={saveLocalName}>บันทึกชื่อ</button>
           </div>
-          <p className="progress-helper">ตอนนี้จับคู่กับ {spiritNames[snapshot.spiritId] || "ธูติประจำตัว"} อยู่</p>
         </section>
 
         <section className="progress-grid">

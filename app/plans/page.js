@@ -17,6 +17,15 @@ export default function PlansPage() {
     () => plans.filter((plan) => plan.cadence === activeCadence),
     [plans, activeCadence]
   );
+  const groupedPlans = useMemo(
+    () =>
+      Object.keys(cadenceLabels).map((cadence) => ({
+        cadence,
+        label: cadenceLabels[cadence],
+        plans: plans.filter((plan) => plan.cadence === cadence),
+      })),
+    [plans]
+  );
 
   function updateCadence(id, cadence) {
     const nextPlans = plans.map((plan) => (plan.id === id ? { ...plan, cadence } : plan));
@@ -68,7 +77,7 @@ export default function PlansPage() {
         </div>
 
         {visiblePlans.length ? (
-          <div className="plan-list">
+          <div className="plan-list plan-list--screen">
             {visiblePlans.map((plan) => (
               <article key={plan.id} className="plan-card">
                 <p className="tiny-label">{cadenceLabels[plan.cadence] || plan.cadence}</p>
@@ -77,21 +86,16 @@ export default function PlansPage() {
                   <button type="button" className="active" onClick={() => followPlan(plan)}>
                     ทำตามแผนแล้ว
                   </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateCadence(
-                        plan.id,
-                        plan.cadence === "daily"
-                          ? "everyOtherDay"
-                          : plan.cadence === "everyOtherDay"
-                            ? "weekly"
-                            : "daily"
-                      )
-                    }
-                  >
-                    เปลี่ยนรอบ
-                  </button>
+                  <label className="plan-cadence-field">
+                    <select
+                      value={plan.cadence}
+                      onChange={(event) => updateCadence(plan.id, event.target.value)}
+                    >
+                      {Object.entries(cadenceLabels).map(([cadence, label]) => (
+                        <option key={cadence} value={cadence}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
                   <button type="button" onClick={() => removePlan(plan.id)}>ลบ</button>
                 </div>
               </article>
@@ -103,6 +107,27 @@ export default function PlansPage() {
             <p>กด Shift แล้วบันทึกสิ่งที่ช่วยได้ แผนจะมาอยู่ที่นี่ตาม cadence ที่เลือกไว้</p>
           </div>
         )}
+
+        <section className="plan-print-groups">
+          {groupedPlans.map((group) => (
+            <div key={group.cadence} className="plan-print-group">
+              <h2>{group.label}</h2>
+              {group.plans.length ? (
+                <div className="plan-list plan-list--print">
+                  {group.plans.map((plan) => (
+                    <article key={plan.id} className="plan-card">
+                      <p>{plan.text}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-plan">
+                  <p>ยังไม่มีแผนในรอบนี้</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </section>
       </section>
     </main>
   );

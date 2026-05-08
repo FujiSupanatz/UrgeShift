@@ -2,9 +2,9 @@ async function postJson(path, payload) {
   const response = await fetch(path, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -14,19 +14,51 @@ async function postJson(path, payload) {
   return response.json();
 }
 
-export async function recommendShift(payload, fallbackAction) {
+export async function startShiftSession(payload, fallbackAction) {
   try {
-    return await postJson("/api/shift/recommend", payload);
+    return await postJson("/api/shift/start", payload);
   } catch {
-    return { action: fallbackAction };
+    return { action: fallbackAction, session: { status: "local fallback" } };
   }
+}
+
+export async function respondToShift(payload, fallbackAction) {
+  try {
+    return await postJson("/api/shift/respond", payload);
+  } catch {
+    return { action: fallbackAction, session: { status: "local fallback" } };
+  }
+}
+
+export async function createPlanPreview(payload) {
+  try {
+    return await postJson("/api/plans", payload);
+  } catch {
+    return {
+      saveAllowed: true,
+      plan: {
+        text: "IF urge moment, THEN use the last helpful move + wait 10 minutes.",
+      },
+    };
+  }
+}
+
+export async function recommendShift(payload, fallbackAction) {
+  return respondToShift(
+    {
+      response: payload?.event || "next",
+      context: payload,
+      selectedOption: payload?.selectedOption,
+    },
+    fallbackAction,
+  );
 }
 
 export async function recommendCheckInShift(payload, fallbackAction) {
   try {
     return await postJson("/api/shift/recommend", {
       ...payload,
-      event: "checkin"
+      event: "checkin",
     });
   } catch {
     return { action: fallbackAction };
@@ -34,18 +66,33 @@ export async function recommendCheckInShift(payload, fallbackAction) {
 }
 
 export async function fetchBuddyDraft(fallbackDraft) {
-  try {
-    const result = await postJson("/api/shift/buddy-draft", {});
-    return result.draft || fallbackDraft;
-  } catch {
-    return fallbackDraft;
-  }
+  const result = await respondToShift(
+    {
+      response: "person",
+      context: {
+        blocker: "need person",
+      },
+    },
+    null,
+  );
+
+  return result?.buddyDraft || fallbackDraft;
 }
 
 export async function checkCrisis(text) {
-  try {
-    return await postJson("/api/shift/crisis-check", { text });
-  } catch {
-    return { status: "safe" };
-  }
+  const result = await respondToShift(
+    {
+      response: "typed-signal",
+      freeSignal: text,
+      context: {
+        typedSignal: text,
+      },
+    },
+    null,
+  );
+
+  return {
+    status: result?.safety?.crisis ? "crisis" : "safe",
+    reasons: result?.safety?.reasons || [],
+  };
 }

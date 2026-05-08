@@ -942,6 +942,18 @@ a {
   align-items: center;
 }
 
+.progress-field {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 220px;
+}
+
+.progress-field span {
+  color: rgba(20, 18, 15, 0.58);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .progress-inline input,
 .progress-card select {
   min-height: 46px;
@@ -950,10 +962,6 @@ a {
   padding: 0 14px;
   background: rgba(255, 255, 255, 0.38);
   color: var(--ink);
-}
-
-.progress-inline input {
-  flex: 1 1 220px;
 }
 
 .progress-inline button,
@@ -1079,6 +1087,21 @@ a {
   gap: 14px;
 }
 
+.plan-print-groups {
+  display: none;
+}
+
+.plan-print-group {
+  display: grid;
+  gap: 12px;
+}
+
+.plan-print-group h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
 .empty-plan,
 .plan-card {
   border: 1px solid rgba(20, 18, 15, 0.14);
@@ -1103,6 +1126,19 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.plan-cadence-field {
+  display: grid;
+}
+
+.plan-cadence-field select {
+  min-height: 44px;
+  border: 1px solid rgba(20, 18, 15, 0.2);
+  border-radius: 999px;
+  padding: 0 16px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.38);
 }
 
 .button-grid button:hover,
@@ -1468,6 +1504,7 @@ a {
   }
 
   .quiz-nav,
+  .app-tabbar,
   .plans-header-actions,
   .plan-tabs,
   .plan-actions,
@@ -1501,5 +1538,19 @@ a {
   .print-schedule {
     break-inside: avoid;
     background: white;
+  }
+
+  .plan-list--screen,
+  .empty-plan {
+    display: none !important;
+  }
+
+  .plan-print-groups {
+    display: grid !important;
+    gap: 18px;
+  }
+
+  .plan-print-group {
+    break-inside: avoid;
   }
 }

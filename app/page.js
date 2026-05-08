@@ -6,12 +6,89 @@ import BrandHeader from "./components/BrandHeader";
 import PhoneShell from "./components/PhoneShell";
 import SessionScreen from "./components/SessionScreen";
 import { recordHardcoreEvent, syncSpiritFromContext } from "./lib/hardcore";
-import { fetchBuddyDraft, recommendShift } from "./lib/shiftApi";
+import {
+  createPlanPreview,
+  fetchBuddyDraft,
+  recommendShift,
+  respondToShift,
+  startShiftSession,
+} from "./lib/shiftApi";
 import { actions, buddyDraft, crumbSteps, normalize } from "./lib/urgeshift";
+
+const defaultContext = {
+  name: "Mint",
+  place: "หน้าร้านสะดวกซื้อ กรุงเทพฯ",
+  situation: "เลิกงานดึก เครียดมาก อยากดื่ม ไม่อยากอธิบาย",
+};
+
+function readHelperSpiritContext() {
+  if (typeof window === "undefined" || typeof window.sessionStorage === "undefined") {
+    return {};
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem("urgeshift-user-context");
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return {
+      helperSpiritId: parsed?.result?.id || "unknown",
+      helperSpiritTitle: parsed?.result?.title || "",
+      helperSpiritOneLine: parsed?.result?.oneLine || "",
+      helperSpiritLlmContext: parsed?.result?.llmContext || "",
+    };
+  } catch {
+    return {};
+  }
+}
+
+function getTimeContext(date = new Date()) {
+  const hour = date.getHours();
+  if (hour >= 5 && hour < 12) return "morning";
+  if (hour >= 12 && hour < 17) return "afternoon";
+  if (hour >= 17 && hour < 21) return "evening";
+  return "night";
+}
+
+function includesAny(value, keywords) {
+  return keywords.some((keyword) => value.includes(keyword));
+}
+
+function inferContextFromSituation(text) {
+  const normalized = text.toLowerCase();
+  const context = {};
+
+  if (includesAny(normalized, ["drink", "ดื่ม"])) context.urge = "drink";
+  if (includesAny(normalized, ["vape", "สูบ"])) context.urge = "vape";
+  if (includesAny(normalized, ["scroll", "ไถ"])) context.urge = "scroll";
+  if (includesAny(normalized, ["gamble", "พนัน"])) context.urge = "gamble";
+
+  if (includesAny(normalized, ["stress", "เครียด"])) {
+    context.triggerLabel = "stress";
+  } else if (includesAny(normalized, ["after work", "work", "เลิกงาน"])) {
+    context.triggerLabel = "after work";
+  } else if (includesAny(normalized, ["tired", "เหนื่อย"])) {
+    context.triggerLabel = "tired";
+  } else if (includesAny(normalized, ["bored", "เบื่อ"])) {
+    context.triggerLabel = "boredom";
+  }
+
+  if (
+    normalized.includes("anyway") ||
+    normalized.includes("do it") ||
+    normalized.includes("still want") ||
+    normalized.includes("ยังอยาก")
+  ) {
+    context.blocker = "still want it";
+    context.readiness = "low";
+  }
+
+  return context;
+}
 
 export default function Home() {
   const [active, setActive] = useState(false);
   const [seconds, setSeconds] = useState(90);
+  const [sessionId, setSessionId] = useState(null);
   const [sessionStatus, setSessionStatus] = useState("not started");
   const [currentAction, setCurrentAction] = useState(actions.first);
   const [urge, setUrge] = useState("unknown");
@@ -20,16 +97,13 @@ export default function Home() {
   const [mode, setMode] = useState("waiting");
   const [crumbStep, setCrumbStep] = useState(null);
   const [buddyVisible, setBuddyVisible] = useState(false);
+  const [buddyDraftText, setBuddyDraftText] = useState(buddyDraft);
   const [saveVisible, setSaveVisible] = useState(false);
   const [planPreview, setPlanPreview] = useState("");
   const [savedPlan, setSavedPlan] = useState("No current session plan yet.");
   const [copyText, setCopyText] = useState("Copy draft");
-  const [buddyDraftText, setBuddyDraftText] = useState(buddyDraft);
-  const [currentContext, setCurrentContext] = useState({
-    name: "Mint",
-    place: "หน้าร้านสะดวกซื้อ กรุงเทพฯ",
-    situation: "เลิกงานดึก เครียดมาก อยากดื่ม ไม่อยากอธิบาย"
-  });
+  const [currentContext, setCurrentContext] = useState(defaultContext);
+  const [apiBusy, setApiBusy] = useState(false);
 
   const currentCrumb = useMemo(() => {
     if (crumbStep === null) return null;
@@ -54,9 +128,60 @@ export default function Home() {
     if (active && seconds === 0) setSessionStatus("pause complete");
   }, [active, seconds]);
 
+  function snapshotContext(overrides = {}) {
+    const helperSpirit = readHelperSpiritContext();
+    return {
+      sessionId,
+      name: currentContext.name,
+      locationCue: currentContext.place || "unknown",
+      timeContext: getTimeContext(),
+      socialState: "unknown",
+      triggerLabel: "urge moment",
+      typedSignal: currentContext.situation,
+      situationSummary: currentContext.situation || "unknown",
+      urge,
+      energy,
+      blocker,
+      mode,
+      lastAction: currentAction.text,
+      lastActionCategory: currentAction.category || "unknown",
+      avoidActionTexts: currentAction?.text ? [currentAction.text] : [],
+      avoidCategories: currentAction?.category ? [currentAction.category] : [],
+      ...helperSpirit,
+      ...inferContextFromSituation(currentContext.situation || ""),
+      ...overrides,
+    };
+  }
+
   function applyAction(action) {
+    if (!action?.text) return;
     setCurrentAction(action);
     setMode(action.mode.toLowerCase());
+  }
+
+  function applyBackendPayload(data, options = {}) {
+    const { applyActionCard = true } = options;
+
+    if (data?.session?.id) setSessionId(data.session.id);
+    if (data?.session?.status) setSessionStatus(data.session.status);
+    if (data?.buddyDraft) setBuddyDraftText(data.buddyDraft);
+
+    if (data?.context) {
+      if (data.context.urge) setUrge(data.context.urge);
+      if (data.context.energy) setEnergy(data.context.energy);
+      if (data.context.blocker) setBlocker(data.context.blocker);
+    }
+
+    if (data?.safety?.crisis) {
+      setSessionStatus("crisis gate");
+      setCrumbStep(null);
+      setBuddyVisible(false);
+      setSaveVisible(false);
+    }
+
+    if (applyActionCard && data?.action) {
+      applyAction(data.action);
+    }
   }
 
   function hidePanels() {
@@ -65,7 +190,7 @@ export default function Home() {
     setSaveVisible(false);
   }
 
-  function startSession() {
+  async function startSession() {
     setActive(true);
     setSeconds(90);
     setSessionStatus("active");
@@ -76,13 +201,83 @@ export default function Home() {
     hidePanels();
     applyAction(actions.first);
     recordHardcoreEvent("session_started", { source: "shift" });
+
+    setApiBusy(true);
+    try {
+      const data = await startShiftSession(
+        {
+          context: snapshotContext({
+            energy: "unknown",
+            blocker: "none",
+            lastAction: actions.first.text,
+            lastActionCategory: actions.first.category,
+            avoidActionTexts: [actions.first.text],
+            avoidCategories: [actions.first.category],
+          }),
+        },
+        actions.first,
+      );
+      applyBackendPayload(data);
+    } catch {
+      setSessionStatus("local fallback");
+    } finally {
+      setApiBusy(false);
+    }
   }
 
-  function askToSavePlan(actionText = currentAction.text) {
-    setPlanPreview(
-      `ถ้า ${currentContext.situation || "urge กลับมา"} ที่ ${currentContext.place || "จุดกระตุ้น"} ให้ ${actionText.toLowerCase()} แล้วรอ 10 นาที.`
-    );
+  async function requestShift(response, contextOverrides = {}, extra = {}, options = {}) {
+    setApiBusy(true);
+
+    try {
+      const data = await respondToShift(
+        {
+          sessionId,
+          response,
+          context: snapshotContext(contextOverrides),
+          lastAction: currentAction.text,
+          lastActionObject: currentAction,
+          ...extra,
+        },
+        currentAction,
+      );
+      applyBackendPayload(data, options);
+      return data;
+    } catch {
+      setSessionStatus("local fallback");
+      return null;
+    } finally {
+      setApiBusy(false);
+    }
+  }
+
+  async function askToSavePlan(actionText = currentAction.text, contextOverrides = {}, selectedOption = null) {
     setSaveVisible(true);
+    setPlanPreview("Creating a narrow save preview...");
+    setApiBusy(true);
+
+    try {
+      const data = await createPlanPreview({
+        sessionId,
+        context: snapshotContext(contextOverrides),
+        helpedAction: actionText,
+        selectedOption,
+        action: currentAction,
+      });
+
+      if (!data.saveAllowed) {
+        setPlanPreview("This moment needs human support, so it was not saved as a plan.");
+        return data;
+      }
+
+      setPlanPreview(data.plan.text);
+      return data;
+    } catch {
+      setSessionStatus("local fallback");
+      setPlanPreview(`IF urge moment, THEN ${actionText.toLowerCase()} + wait 10 minutes.`);
+      return null;
+    } finally {
+      setApiBusy(false);
+    }
   }
 
   function showCrumbs(step = 0) {
@@ -91,45 +286,51 @@ export default function Home() {
   }
 
   async function showBuddyBridge() {
-    setBuddyDraftText(await fetchBuddyDraft(buddyDraft));
+    const draft = await fetchBuddyDraft(buddyDraftText || buddyDraft);
+    setBuddyDraftText(draft);
     setBuddyVisible(true);
     setMode("buddy bridge");
   }
 
-  async function showHarmReduction() {
-    const result = await recommendShift(
-      {
-        event: "anyway",
-        urge,
-        energy,
-        blocker,
-        mode
-      },
-      actions.harm
-    );
-    applyAction(result.action || actions.harm);
+  function showHarmReduction() {
     setCrumbStep(null);
     setMode("harm-reduction mode");
   }
 
   async function selectCrumb(key, value) {
     const nextValue = normalize(value);
+    const contextOverrides = { [key]: nextValue };
+    const nextStep = (crumbStep ?? 0) + 1;
+    const shouldApplyAction =
+      nextStep >= crumbSteps.length ||
+      value.includes("Need person") ||
+      value.includes("Still want it");
+
     if (key === "urge") setUrge(nextValue);
     if (key === "energy") setEnergy(nextValue);
     if (key === "blocker") setBlocker(nextValue);
 
-    if (value.includes("Need person")) {
+    const data = await requestShift(
+      "crumb",
+      contextOverrides,
+      {
+        crumbKey: key,
+        crumbValue: value,
+      },
+      { applyActionCard: shouldApplyAction },
+    );
+
+    if (value.includes("Need person") || data?.action?.mode === "Buddy Bridge") {
       await showBuddyBridge();
       return;
     }
 
-    if (value.includes("Still want it")) {
+    if (value.includes("Still want it") || data?.action?.mode === "Harm-reduction mode") {
       setBlocker("still want it");
-      await showHarmReduction();
+      showHarmReduction();
       return;
     }
 
-    const nextStep = (crumbStep ?? 0) + 1;
     showCrumbs(nextStep);
   }
 
@@ -137,36 +338,41 @@ export default function Home() {
     if (!active && action !== "stop") return;
 
     if (action === "done") {
+      const data = await requestShift("done", {}, {}, { applyActionCard: false });
       showCrumbs(0);
-      askToSavePlan(currentAction.text);
+      if (data?.plan?.text) {
+        setPlanPreview(data.plan.text);
+        setSaveVisible(true);
+      } else {
+        await askToSavePlan(currentAction.text);
+      }
       recordHardcoreEvent("session_completed", { source: "shift", result: "done" });
     }
 
     if (action === "too-hard") {
       setBlocker("too hard");
-      const result = await recommendShift(
-        { event: "too-hard", urge, energy, blocker: "too hard", mode },
-        actions.downshift
-      );
-      applyAction(result.action || actions.downshift);
+      await requestShift("too-hard", { blocker: "too hard" });
       showCrumbs(0);
     }
 
     if (action === "different") {
       setBlocker("wrong vibe");
-      const result = await recommendShift(
-        { event: "different", urge, energy, blocker: "wrong vibe", mode },
-        actions.different
-      );
-      applyAction(result.action || actions.different);
+      await requestShift("different", { blocker: "wrong vibe" });
       showCrumbs(0);
     }
 
-    if (action === "person") await showBuddyBridge();
+    if (action === "person") {
+      await requestShift("person", { blocker: "need person" });
+      await showBuddyBridge();
+    }
 
     if (action === "anyway") {
       setBlocker("still want it");
-      await showHarmReduction();
+      await requestShift("anyway", {
+        blocker: "still want it",
+        readiness: "low",
+      });
+      showHarmReduction();
       recordHardcoreEvent("session_completed", { source: "shift", result: "harm-reduction" });
     }
 
@@ -176,12 +382,25 @@ export default function Home() {
       applyAction(actions.stopped);
       hidePanels();
       recordHardcoreEvent("session_stopped", { source: "shift" });
+      await requestShift("stop", {}, {}, { applyActionCard: false });
     }
   }
 
-  function handleHarmMove(option) {
+  async function handleHarmMove(option) {
     setBlocker("harm reduction");
-    askToSavePlan(option);
+
+    const data = await requestShift(
+      "harm-option",
+      { blocker: "harm reduction" },
+      { selectedOption: option },
+    );
+
+    if (data?.plan?.text) {
+      setPlanPreview(data.plan.text);
+      setSaveVisible(true);
+    } else {
+      await askToSavePlan(option, { blocker: "harm reduction" }, option);
+    }
   }
 
   function savePlan() {
@@ -191,9 +410,9 @@ export default function Home() {
         id: Date.now(),
         text: planPreview,
         cadence: "daily",
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       },
-      ...plans
+      ...plans,
     ];
     window.sessionStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
     window.sessionStorage.setItem("urgeshift-plan", planPreview);
@@ -212,7 +431,7 @@ export default function Home() {
   function updateContext(field, value) {
     setCurrentContext((context) => ({
       ...context,
-      [field]: value
+      [field]: value,
     }));
   }
 
@@ -241,7 +460,7 @@ export default function Home() {
 
       <section className="left-pane" aria-label="UrgeShift session">
         <BrandHeader />
-        <PhoneShell status={sessionStatus} active={active}>
+        <PhoneShell status={apiBusy ? "shaping move" : sessionStatus} active={active}>
           {!active ? (
             <section className="screen active">
               <div className="promise">
