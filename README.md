@@ -11,7 +11,7 @@ Core idea:
 ## Product Surfaces
 
 - `/` — `Shift` private session
-- `/context` — `ธูติ` background quiz
+- `/context` — `ภูติ` background quiz
 - `/preview` — Better Self Preview
 - `/plans` — saved plans + print flow
 - `/progress` — local-only progress, check-ins, and demo metrics

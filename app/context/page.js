@@ -17,7 +17,7 @@ const traitLabels = {
 const questions = [
   {
     id: "first_reaction",
-    text: "ตอน urge เริ่มมา อยากให้ธูติช่วยแบบไหนก่อน?",
+    text: "ตอน urge เริ่มมา อยากให้ภูติช่วยแบบไหนก่อน?",
     choices: [
       { id: "move", text: "ชวนขยับนิดเดียว ก่อนใจจะต่อรองนานเกินไป", traits: { spark: 2, wind: 1 } },
       { id: "freeze", text: "ลดเสียงรอบตัว ให้ใจค่อยๆ กลับมา", traits: { mist: 2, sprout: 1 } },
@@ -47,11 +47,11 @@ const questions = [
   },
   {
     id: "when_low",
-    text: "ถ้าแรงเหลือน้อยมาก ธูติควรขอแค่อะไร?",
+    text: "ถ้าแรงเหลือน้อยมาก ภูติควรขอแค่อะไร?",
     choices: [
       { id: "one_breath", text: "หายใจด้วยกันหนึ่งครั้ง", traits: { mist: 2, sprout: 1 } },
       { id: "turn_body", text: "หันตัวออกจากสิ่งที่กระตุ้นนิดเดียว", traits: { sprout: 2, wind: 1 } },
-      { id: "tap_button", text: "กดปุ่มเดียว แล้วให้ธูติพาไปต่อ", traits: { wind: 2, spark: 1 } },
+      { id: "tap_button", text: "กดปุ่มเดียว แล้วให้ภูติพาไปต่อ", traits: { wind: 2, spark: 1 } },
       { id: "send_dot", text: "ส่งจุดเล็กๆ ให้คนที่ไว้ใจ", traits: { light: 2, mist: 1 } }
     ]
   },
@@ -69,54 +69,54 @@ const questions = [
 
 const results = {
   spark: {
-    title: "ธูติประกายไฟ",
+    title: "ภูติประกายไฟ",
     oneLine: "เริ่มนิดเดียวก่อน ใจค่อยตามมา",
-    share: "ธูติประจำตัวของฉันคือ ธูติประกายไฟ: เวลาความอยากมาแรง แค่ขยับก้าวเล็กๆ ก่อนก็พอ",
+    share: "ภูติประจำตัวของฉันคือ ภูติประกายไฟ: เวลาความอยากมาแรง แค่ขยับก้าวเล็กๆ ก่อนก็พอ",
     card: "เหมาะกับปุ่มใหญ่ ก้าวแรกง่าย คำน้อยๆ ที่ช่วยพาออกจากวงวนโดยไม่ต้องคิดเยอะ",
     llm: "User responds best to warm, immediate, low-verbiage actions. Prioritize one small concrete step, gentle momentum, and minimal reflection.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, tiny ember spirit, soft warm orange glow, gentle forward motion, caring protective presence, not childish, paper-grain texture, Thai contemporary illustration, no text, mobile app result card, high contrast, kind expression"
   },
 
   mist: {
-    title: "ธูติหมอกนุ่ม",
+    title: "ภูติหมอกนุ่ม",
     oneLine: "ไม่ต้องรีบ เดี๋ยวค่อยๆ กลับมา",
-    share: "ธูติประจำตัวของฉันคือ ธูติหมอกนุ่ม: วันที่ใจเบลอ แค่มีเสียงนุ่มๆ กับก้าวเล็กมากๆ ก็พอ",
+    share: "ภูติประจำตัวของฉันคือ ภูติหมอกนุ่ม: วันที่ใจเบลอ แค่มีเสียงนุ่มๆ กับก้าวเล็กมากๆ ก็พอ",
     card: "เหมาะกับโหมดเงียบๆ grounding เบาๆ ไม่มีแรงกด ไม่มีคำสั่ง มีแค่การพากลับมาช้าๆ",
     llm: "User responds best to gentle, low-pressure, nonjudgmental support. Avoid urgency-heavy language. Offer very small grounding actions with warmth.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, soft mist spirit, pale cream and cool green haze, calm caring presence, gentle rounded shapes, paper-grain texture, Thai contemporary illustration, no text, mobile app result card, soothing but not babyish"
   },
 
   sprout: {
-    title: "ธูติต้นกล้า",
+    title: "ภูติต้นกล้า",
     oneLine: "จับพื้นไว้ แล้วหายใจอีกครั้ง",
-    share: "ธูติประจำตัวของฉันคือ ธูติต้นกล้า: เวลาใจแกว่ง ร่างกายช่วยพากลับมาได้ทีละนิด",
+    share: "ภูติประจำตัวของฉันคือ ภูติต้นกล้า: เวลาใจแกว่ง ร่างกายช่วยพากลับมาได้ทีละนิด",
     card: "เหมาะกับสิ่งจับต้องได้: วางเท้า ดื่มน้ำ ลุกเปลี่ยนที่ หายใจ และออกจากจุดที่กระตุ้น",
     llm: "User responds best to body-based grounding, environmental shifts, and simple routines. Suggest sensory anchors and gentle movement.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, grounded sprout spirit, earthy green and ochre, small sturdy body, calm hands touching ground, caring protective companion, paper-grain texture, Thai contemporary illustration, no text, mobile app result card"
   },
 
   water: {
-    title: "ธูติน้ำใจ",
+    title: "ภูติน้ำใจ",
     oneLine: "เรียกชื่อมันเบาๆ แล้วค่อยไปต่อ",
-    share: "ธูติประจำตัวของฉันคือ ธูติน้ำใจ: แค่รู้ทันว่าใจตอนนี้เป็นอะไร บางอย่างก็เบาลงเองนิดหนึ่ง",
+    share: "ภูติประจำตัวของฉันคือ ภูติน้ำใจ: แค่รู้ทันว่าใจตอนนี้เป็นอะไร บางอย่างก็เบาลงเองนิดหนึ่ง",
     card: "เหมาะกับการค่อยๆ รู้ทันใจแบบสั้นๆ: นี่คือเครียด นี่คือเหงา นี่คือเหนื่อย แล้วค่อยเลือกก้าวถัดไป",
     llm: "User responds best to brief emotional labeling and gentle meaning-making. Keep reflection short, validating, and followed by one small action.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, water-heart spirit, small reflective gem, warm cream and teal, compassionate gaze, helps name feelings softly, paper-grain texture, Thai contemporary illustration, no text, mobile app result card"
   },
 
   wind: {
-    title: "ธูติลมเย็น",
+    title: "ภูติลมเย็น",
     oneLine: "ให้ง่ายไว้ก่อน ใจจะได้ไม่ถอย",
-    share: "ธูติประจำตัวของฉันคือ ธูติลมเย็น: ตอนใจล้า แค่มีทางที่ง่ายพอให้ทำไหว ก็ช่วยได้มากแล้ว",
+    share: "ภูติประจำตัวของฉันคือ ภูติลมเย็น: ตอนใจล้า แค่มีทางที่ง่ายพอให้ทำไหว ก็ช่วยได้มากแล้ว",
     card: "เหมาะกับทางเลือกสั้นๆ กดครั้งเดียว ใช้ค่าเริ่มต้นได้เลย และคำตอบที่ไม่ต้องฝืนคิดเยอะ",
     llm: "User has low tolerance for friction during distress. Use defaults, chips, one-tap choices, and avoid open-ended questions unless necessary.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, wind spirit, tiny guide with folded-paper arrow cloak, soft orange accent, fast but gentle, minimal friction theme, caring expression, paper-grain texture, Thai contemporary illustration, no text, mobile app result card"
   },
 
   light: {
-    title: "ธูติแสงดาว",
+    title: "ภูติแสงดาว",
     oneLine: "ไม่ต้องผ่านคนเดียว",
-    share: "ธูติประจำตัวของฉันคือ ธูติแสงดาว: บางช่วงเวลา แค่มีใครสักคนอยู่ปลายสายก็ช่วยให้ผ่านไปได้",
+    share: "ภูติประจำตัวของฉันคือ ภูติแสงดาว: บางช่วงเวลา แค่มีใครสักคนอยู่ปลายสายก็ช่วยให้ผ่านไปได้",
     card: "เหมาะกับ Buddy Bridge, ข้อความร่าง, คนที่ไว้ใจ, และภาษาที่ขอให้อยู่ด้วยโดยไม่รู้สึกเป็นภาระ",
     llm: "User responds best to relational support. Offer gentle buddy message drafts and reassurance that asking for presence is enough.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, light spirit, tiny companion holding a soft glowing thread between people, warm green and orange, relational support, gentle protective expression, paper-grain texture, Thai contemporary illustration, no text, mobile app result card"
@@ -221,7 +221,7 @@ export default function ContextQuizPage() {
         {!started ? (
           <section className="quiz-hero p-6 max-w-sm mx-auto text-center space-y-3">
             <p className="eyebrow">Context quiz</p>
-            <h1>ธูติประจำตัวของคุณเป็นแบบไหน?</h1>
+            <h1>ภูติประจำตัวของคุณเป็นแบบไหน?</h1>
             <p>ตอบ 5 ข้อ ให้แอปรู้ persona ที่ควรใช้ช่วยคุณตอน urge มา ข้อมูลอยู่แค่ใน session นี้</p>
             <button className="quiz-start" type="button" onClick={start}>เริ่มเลย / Start</button>
           </section>
@@ -273,7 +273,7 @@ export default function ContextQuizPage() {
               <p>{result.share}</p>
             </div>
             <div className="prompt-box">
-              <p className="tiny-label">Prompt สำหรับสร้างภาพธูติ</p>
+              <p className="tiny-label">Prompt สำหรับสร้างภาพภูติ</p>
               <code>{result.imagePrompt}</code>
             </div>
             <div className="quiz-actions">
@@ -290,7 +290,7 @@ export default function ContextQuizPage() {
                   <tr>
                     <th>เวลา</th>
                     <th>urge / จุดเสี่ยง</th>
-                    <th>ให้ธูติช่วยแบบไหน</th>
+                    <th>ให้ภูติช่วยแบบไหน</th>
                     <th>ทำแล้ว</th>
                   </tr>
                 </thead>
