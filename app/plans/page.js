@@ -1,13 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-
-const cadenceLabels = {
-  daily: "วันนี้ / Daily",
-  everyOtherDay: "วันเว้นวัน / Every other day",
-  weekly: "รายสัปดาห์ / Weekly"
-};
+import { useEffect, useState } from "react";
+import PlansList from "../components/PlansList";
 
 export default function PlansPage() {
   const [plans, setPlans] = useState([]);
@@ -16,11 +11,6 @@ export default function PlansPage() {
   useEffect(() => {
     setPlans(JSON.parse(window.localStorage.getItem("urgeshift-plans") || "[]"));
   }, []);
-
-  const visiblePlans = useMemo(
-    () => plans.filter((plan) => plan.cadence === activeCadence),
-    [plans, activeCadence]
-  );
 
   function updateCadence(id, cadence) {
     const nextPlans = plans.map((plan) => (plan.id === id ? { ...plan, cadence } : plan));
@@ -46,46 +36,13 @@ export default function PlansPage() {
           <Link className="text-link" href="/">กลับไป Shift Now</Link>
         </div>
 
-        <div className="plan-tabs" role="tablist" aria-label="Plan cadence">
-          {Object.entries(cadenceLabels).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              className={activeCadence === key ? "active" : ""}
-              onClick={() => setActiveCadence(key)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="plan-list">
-          {visiblePlans.length === 0 ? (
-            <div className="empty-plan">
-              <h2>ยังไม่มีแผนในหมวดนี้</h2>
-              <p>หลังจาก Shift Now ช่วยได้ ให้บันทึกเป็นแผน 10 นาที</p>
-            </div>
-          ) : (
-            visiblePlans.map((plan) => (
-              <article className="plan-card" key={plan.id}>
-                <p>{plan.text}</p>
-                <div className="plan-actions">
-                  {Object.entries(cadenceLabels).map(([key, label]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className={plan.cadence === key ? "active" : ""}
-                      onClick={() => updateCadence(plan.id, key)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-            <button type="button" onClick={() => removePlan(plan.id)}>ลบ / Remove</button>
-                </div>
-              </article>
-            ))
-          )}
-        </div>
+        <PlansList
+          plans={plans}
+          activeCadence={activeCadence}
+          onCadenceChange={setActiveCadence}
+          onUpdatePlanCadence={updateCadence}
+          onRemovePlan={removePlan}
+        />
       </section>
     </main>
   );
