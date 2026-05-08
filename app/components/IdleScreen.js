@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function IdleScreen({ onStart }) {
   return (
     <section className="screen active">
@@ -12,9 +10,8 @@ export default function IdleScreen({ onStart }) {
         <small>เริ่มก้าวแรก</small>
       </button>
       <p className="privacy-note">
-        ข้อมูลของผู้ใช้ จะหายไปหลังจากออกแอพโดยอัตโนมัติ
+        ไม่มี login ไม่มี database แผนจะอยู่เฉพาะระหว่างเปิดหน้านี้
       </p>
-      <Link className="text-link" href="/plans">ดูแผนที่บันทึกไว้ / Saved plans</Link>
     </section>
   );
 }
