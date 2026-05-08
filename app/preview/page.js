@@ -100,6 +100,8 @@ export default function PreviewPage() {
   return (
     <main className="preview-page">
       <section className="preview-shell">
+        <AppTabBar />
+
         <section className="preview-hero">
           <p className="eyebrow">Better Self Preview</p>
           <h1>ตัวเราที่ค่อยๆ กลับมาคุมได้</h1>
@@ -140,8 +142,6 @@ export default function PreviewPage() {
             ))}
           </div>
         </section>
-
-        <AppTabBar />
       </section>
     </main>
   );

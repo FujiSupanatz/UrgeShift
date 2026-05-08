@@ -1,14 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import AppTabBar from "./components/AppTabBar";
 import BrandHeader from "./components/BrandHeader";
-import ContextPanel from "./components/ContextPanel";
-import IdleScreen from "./components/IdleScreen";
 import PhoneShell from "./components/PhoneShell";
-import SavedPlanPanel from "./components/SavedPlanPanel";
 import SessionScreen from "./components/SessionScreen";
-import StateBoard from "./components/StateBoard";
+import { recordHardcoreEvent, syncSpiritFromContext } from "./lib/hardcore";
 import { fetchBuddyDraft, recommendShift } from "./lib/shiftApi";
 import { actions, buddyDraft, crumbSteps, normalize } from "./lib/urgeshift";
 
@@ -42,6 +39,7 @@ export default function Home() {
   useEffect(() => {
     const stored = window.sessionStorage.getItem("urgeshift-plan");
     if (stored) setSavedPlan(stored);
+    syncSpiritFromContext();
   }, []);
 
   useEffect(() => {
@@ -77,6 +75,7 @@ export default function Home() {
     setMode("first move");
     hidePanels();
     applyAction(actions.first);
+    recordHardcoreEvent("session_started", { source: "shift" });
   }
 
   function askToSavePlan(actionText = currentAction.text) {
@@ -140,6 +139,7 @@ export default function Home() {
     if (action === "done") {
       showCrumbs(0);
       askToSavePlan(currentAction.text);
+      recordHardcoreEvent("session_completed", { source: "shift", result: "done" });
     }
 
     if (action === "too-hard") {
@@ -167,6 +167,7 @@ export default function Home() {
     if (action === "anyway") {
       setBlocker("still want it");
       await showHarmReduction();
+      recordHardcoreEvent("session_completed", { source: "shift", result: "harm-reduction" });
     }
 
     if (action === "stop") {
@@ -174,6 +175,7 @@ export default function Home() {
       setSessionStatus("stopped");
       applyAction(actions.stopped);
       hidePanels();
+      recordHardcoreEvent("session_stopped", { source: "shift" });
     }
   }
 
@@ -198,6 +200,7 @@ export default function Home() {
     setSavedPlan(planPreview);
     setSaveVisible(false);
     setSessionStatus("session plan ready");
+    recordHardcoreEvent("plan_saved", { text: planPreview, cadence: "daily" });
   }
 
   function clearPlan() {
@@ -227,8 +230,15 @@ export default function Home() {
     showCrumbs(crumbStep ?? 0);
   }
 
+  function guardNavigation(href) {
+    if (!active || href === "/") return true;
+    return window.confirm("กำลังอยู่ในช่วงช่วยพยุงใจ\nจะออกจาก session นี้ไหม");
+  }
+
   return (
     <main className="stage" data-state={active ? "active" : "idle"}>
+      <AppTabBar beforeNavigate={guardNavigation} />
+
       <section className="left-pane" aria-label="UrgeShift session">
         <BrandHeader />
         <PhoneShell status={sessionStatus} active={active}>
@@ -245,11 +255,6 @@ export default function Home() {
               <p className="privacy-note">
                 ข้อมูลของผู้ใช้ จะหายไปหลังจากออกแอพโดยอัตโนมัติ
               </p>
-              <div className="link-row">
-                <Link className="text-link" href="/context">ทำ quiz สั้นๆ / Context quiz</Link>
-                <Link className="text-link" href="/preview">ดูตัวเราที่ค่อยๆ กลับมา / Preview</Link>
-                <Link className="text-link" href="/plans">ดูแผนที่บันทึกไว้ / Saved plans</Link>
-              </div>
             </section>
           ) : (
             <SessionScreen
@@ -316,9 +321,6 @@ export default function Home() {
         <section className="saved-plan">
           <p className="tiny-label">แผนที่บันทึก / Saved plan</p>
           <div>{savedPlan}</div>
-          <Link className="text-link" href="/context">อัปเดตพื้นหลัง / Context quiz</Link>
-          <Link className="text-link" href="/preview">ดู Better Self Preview</Link>
-          <Link className="text-link" href="/plans">เปิดแผนทั้งหมด / Open plans</Link>
           <button type="button" onClick={clearPlan}>ล้างแผน</button>
         </section>
       </aside>

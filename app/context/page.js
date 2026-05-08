@@ -216,8 +216,10 @@ export default function ContextQuizPage() {
   return (
     <main className="quiz-page">
       <section className="quiz-shell">
+        <AppTabBar />
+
         {!started ? (
-          <section className="quiz-hero">
+          <section className="quiz-hero p-6 max-w-sm mx-auto text-center space-y-3">
             <p className="eyebrow">Context quiz</p>
             <h1>ธูติประจำตัวของคุณเป็นแบบไหน?</h1>
             <p>ตอบ 5 ข้อ ให้แอปรู้ persona ที่ควรใช้ช่วยคุณตอน urge มา ข้อมูลอยู่แค่ใน session นี้</p>
@@ -307,7 +309,6 @@ export default function ContextQuizPage() {
           </section>
         ) : null}
 
-        <AppTabBar />
       </section>
     </main>
   );

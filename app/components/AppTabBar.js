@@ -8,7 +8,7 @@ const tabs = [
   { href: "/context", label: "ธูติ" },
   { href: "/preview", label: "Preview" },
   { href: "/plans", label: "Plans" },
-  { href: "/progress", label: "Progress", disabled: true }
+  { href: "/progress", label: "Progress" }
 ];
 
 function getTabClassName({ active, disabled }) {
@@ -21,7 +21,7 @@ function getTabClassName({ active, disabled }) {
     .join(" ");
 }
 
-export default function AppTabBar() {
+export default function AppTabBar({ beforeNavigate }) {
   const pathname = usePathname();
 
   return (
@@ -30,25 +30,17 @@ export default function AppTabBar() {
         {tabs.map((tab) => {
           const active = pathname === tab.href;
 
-          if (tab.disabled) {
-            return (
-              <span
-                key={tab.label}
-                aria-disabled="true"
-                className={getTabClassName({ active: false, disabled: true })}
-                title="Coming next slice"
-              >
-                {tab.label}
-              </span>
-            );
-          }
-
           return (
             <Link
               key={tab.href}
               href={tab.href}
               aria-current={active ? "page" : undefined}
               className={getTabClassName({ active, disabled: false })}
+              onClick={(event) => {
+                if (beforeNavigate && beforeNavigate(tab.href) === false) {
+                  event.preventDefault();
+                }
+              }}
             >
               {tab.label}
             </Link>
