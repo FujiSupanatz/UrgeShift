@@ -1,13 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-
-const cadenceLabels = {
-  daily: "วันนี้ / Daily",
-  everyOtherDay: "วันเว้นวัน / Every other day",
-  weekly: "รายสัปดาห์ / Weekly"
-};
 
 export default function PlansPage() {
   const [plans, setPlans] = useState([]);
@@ -49,45 +40,9 @@ export default function PlansPage() {
           </div>
         </div>
 
-        <div className="plan-tabs" role="tablist" aria-label="Plan cadence">
-          {Object.entries(cadenceLabels).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              className={activeCadence === key ? "active" : ""}
-              onClick={() => setActiveCadence(key)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="plan-list">
-          {visiblePlans.length === 0 ? (
-            <div className="empty-plan">
-              <h2>ยังไม่มีแผนในหมวดนี้</h2>
-              <p>หลังจาก Shift Now ช่วยได้ ให้บันทึกเป็นแผน 10 นาที</p>
-            </div>
-          ) : (
-            visiblePlans.map((plan) => (
-              <article className="plan-card" key={plan.id}>
-                <p>{plan.text}</p>
-                <div className="plan-actions">
-                  {Object.entries(cadenceLabels).map(([key, label]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className={plan.cadence === key ? "active" : ""}
-                      onClick={() => updateCadence(plan.id, key)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-            <button type="button" onClick={() => removePlan(plan.id)}>ลบ / Remove</button>
-                </div>
-              </article>
-            ))
-          )}
+        <div className="empty-plan">
+          <h2>ใช้แผนได้เฉพาะระหว่าง session ปัจจุบัน</h2>
+          <p>ถ้า refresh หรือปิดหน้า แผนจะหายไปตาม privacy-first mode.</p>
         </div>
       </section>
     </main>
