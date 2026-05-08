@@ -100,7 +100,7 @@ export default function Home() {
   }, [crumbStep]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("urgeshift-plan");
+    const stored = window.sessionStorage.getItem("urgeshift-plan");
     if (stored) setSavedPlan(stored);
   }, []);
 
@@ -219,7 +219,7 @@ export default function Home() {
   }
 
   function savePlan() {
-    const plans = JSON.parse(window.localStorage.getItem("urgeshift-plans") || "[]");
+    const plans = JSON.parse(window.sessionStorage.getItem("urgeshift-plans") || "[]");
     const nextPlans = [
       {
         id: Date.now(),
@@ -229,16 +229,16 @@ export default function Home() {
       },
       ...plans
     ];
-    window.localStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
-    window.localStorage.setItem("urgeshift-plan", planPreview);
+    window.sessionStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
+    window.sessionStorage.setItem("urgeshift-plan", planPreview);
     setSavedPlan(planPreview);
     setSaveVisible(false);
     setSessionStatus("plan saved");
   }
 
   function clearPlan() {
-    window.localStorage.removeItem("urgeshift-plan");
-    window.localStorage.removeItem("urgeshift-plans");
+    window.sessionStorage.removeItem("urgeshift-plan");
+    window.sessionStorage.removeItem("urgeshift-plans");
     setSavedPlan("No plan saved yet.");
   }
 
@@ -290,7 +290,11 @@ export default function Home() {
               <p className="privacy-note">
                 ข้อมูลของผู้ใช้ จะหายไปหลังจากออกแอพโดยอัตโนมัติ
               </p>
-              <Link className="text-link" href="/plans">ดูแผนที่บันทึกไว้ / Saved plans</Link>
+              <div className="link-row">
+                <Link className="text-link" href="/context">ทำ quiz สั้นๆ / Context quiz</Link>
+                <Link className="text-link" href="/preview">ดูตัวเราที่ค่อยๆ กลับมา / Preview</Link>
+                <Link className="text-link" href="/plans">ดูแผนที่บันทึกไว้ / Saved plans</Link>
+              </div>
             </section>
           ) : (
             <section className="screen active">
@@ -422,6 +426,8 @@ export default function Home() {
         <section className="saved-plan">
           <p className="tiny-label">แผนที่บันทึก / Saved plan</p>
           <div>{savedPlan}</div>
+          <Link className="text-link" href="/context">อัปเดตพื้นหลัง / Context quiz</Link>
+          <Link className="text-link" href="/preview">ดู Better Self Preview</Link>
           <Link className="text-link" href="/plans">เปิดแผนทั้งหมด / Open plans</Link>
           <button type="button" onClick={clearPlan}>ล้างแผน</button>
         </section>

@@ -14,7 +14,7 @@ export default function PlansPage() {
   const [activeCadence, setActiveCadence] = useState("daily");
 
   useEffect(() => {
-    setPlans(JSON.parse(window.localStorage.getItem("urgeshift-plans") || "[]"));
+    setPlans(JSON.parse(window.sessionStorage.getItem("urgeshift-plans") || "[]"));
   }, []);
 
   const visiblePlans = useMemo(
@@ -25,13 +25,13 @@ export default function PlansPage() {
   function updateCadence(id, cadence) {
     const nextPlans = plans.map((plan) => (plan.id === id ? { ...plan, cadence } : plan));
     setPlans(nextPlans);
-    window.localStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
+    window.sessionStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
   }
 
   function removePlan(id) {
     const nextPlans = plans.filter((plan) => plan.id !== id);
     setPlans(nextPlans);
-    window.localStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
+    window.sessionStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
   }
 
   return (
@@ -41,9 +41,12 @@ export default function PlansPage() {
           <div>
             <p className="eyebrow">Saved plans</p>
             <h1>แผนที่ช่วยได้</h1>
-            <p>เก็บเฉพาะสิ่งที่ช่วย ไม่เก็บคำสารภาพ</p>
+            <p>เก็บเฉพาะใน session นี้ ถ้าต้องใช้ต่อให้พิมพ์หรือเซฟ PDF</p>
           </div>
-          <Link className="text-link" href="/">กลับไป Shift Now</Link>
+          <div className="plans-header-actions">
+            <button type="button" onClick={() => window.print()}>พิมพ์ / Print</button>
+            <Link className="text-link" href="/">กลับไป Shift Now</Link>
+          </div>
         </div>
 
         <div className="plan-tabs" role="tablist" aria-label="Plan cadence">
