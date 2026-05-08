@@ -1,0 +1,4 @@
+.env*
+.agents*
+AGENTS.md
+multi_agent_ideation_council.md
