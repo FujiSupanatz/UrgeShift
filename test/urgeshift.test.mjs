@@ -2,8 +2,15 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { createPlan, createShiftSession, respondToShift } from "../lib/urgeshift/planEngine.js";
-import { createPlanWithLlm, suggestActivityWithLlm } from "../lib/urgeshift/llm.js";
+import {
+  classifyCrisisWithLlm,
+  createBuddyDraftWithLlm,
+  createPlanWithLlm,
+  getLlmRuntimeDebug,
+  suggestActivityWithLlm,
+} from "../lib/urgeshift/llm.js";
 import { detectSafetyRisk } from "../lib/urgeshift/safety.js";
+import { buddyDraft } from "../lib/urgeshift/actions.js";
 
 describe("UrgeShift backend plan engine", () => {
   it("starts a private session with a no-context first move", () => {
@@ -136,6 +143,32 @@ describe("UrgeShift backend plan engine", () => {
     assert.equal(result.llm.used, false);
     assert.equal(result.llm.reason, "missing-api-key");
     assert.equal(result.action, fallbackAction);
+  });
+
+  it("reports resolved runtime env sources without exposing secrets", () => {
+    const debug = getLlmRuntimeDebug({
+      URGESHIFT_LLM_API_KEY: "top-secret",
+      TYPHOON_API_KEY: "unused",
+      TYPHOON_BASE_URL: "https://typhoon.example/v1",
+      TYPHOON_MODEL: "typhoon-test",
+      TYPHOON_TIMEOUT_MS: "4321",
+      NODE_ENV: "production",
+      VERCEL_ENV: "preview",
+      VERCEL_REGION: "sin1",
+    });
+
+    assert.equal(debug.hasApiKey, true);
+    assert.equal(debug.apiKeySource, "URGESHIFT_LLM_API_KEY");
+    assert.equal(debug.baseUrl, "https://typhoon.example/v1");
+    assert.equal(debug.baseUrlSource, "TYPHOON_BASE_URL");
+    assert.equal(debug.model, "typhoon-test");
+    assert.equal(debug.modelSource, "TYPHOON_MODEL");
+    assert.equal(debug.timeoutMs, 4321);
+    assert.equal(debug.timeoutSource, "TYPHOON_TIMEOUT_MS");
+    assert.equal(debug.nodeEnv, "production");
+    assert.equal(debug.vercelEnv, "preview");
+    assert.equal(debug.vercelRegion, "sin1");
+    assert.equal("apiKey" in debug, false);
   });
 
   it("uses a valid LLM activity suggestion from sanitized context", async () => {
@@ -282,6 +315,112 @@ describe("UrgeShift backend plan engine", () => {
     assert.equal(result.llm.used, false);
     assert.equal(result.llm.reason, "missing-api-key");
     assert.equal(result.plan.text, fallbackPlanResponse.plan.text);
+  });
+
+  it("falls back to the static buddy draft when no LLM key is configured", async () => {
+    const result = await createBuddyDraftWithLlm(
+      {
+        fallbackDraft: buddyDraft,
+        blocker: "need person",
+      },
+      {
+        env: {},
+        fetchImpl: async () => {
+          throw new Error("should not fetch without a key");
+        },
+      },
+    );
+
+    assert.equal(result.draft, buddyDraft);
+    assert.equal(result.llm.used, false);
+    assert.equal(result.llm.reason, "missing-api-key");
+  });
+
+  it("uses a valid LLM buddy draft", async () => {
+    const result = await createBuddyDraftWithLlm(
+      {
+        fallbackDraft: buddyDraft,
+        blocker: "need person",
+        urge: "drink",
+      },
+      {
+        env: {
+          URGESHIFT_LLM_API_KEY: "test-key",
+        },
+        fetchImpl: async () => ({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    draft: "เฮ้ เรากำลังพยายามผ่านช่วงยากๆ 10 นาทีนี้อยู่ ช่วยอยู่เป็นเพื่อนทางแชตได้ไหม ไม่ต้องแก้อะไร แค่อยู่ด้วยก็พอ",
+                    reason: "short relational support",
+                  }),
+                },
+              },
+            ],
+          }),
+        }),
+      },
+    );
+
+    assert.equal(result.llm.used, true);
+    assert.match(result.draft, /อยู่เป็นเพื่อน/);
+  });
+
+  it("classifies deterministic crisis signals before calling the LLM", async () => {
+    let called = false;
+    const result = await classifyCrisisWithLlm(
+      {
+        text: "I can't stay safe tonight",
+      },
+      {
+        env: {
+          URGESHIFT_LLM_API_KEY: "test-key",
+        },
+        fetchImpl: async () => {
+          called = true;
+          return {};
+        },
+      },
+    );
+
+    assert.equal(called, false);
+    assert.equal(result.status, "crisis");
+    assert.equal(result.llm.used, false);
+    assert.equal(result.llm.reason, "deterministic-crisis");
+  });
+
+  it("uses the LLM for non-deterministic crisis classification", async () => {
+    const result = await classifyCrisisWithLlm(
+      {
+        text: "I need a person with me right now",
+      },
+      {
+        env: {
+          URGESHIFT_LLM_API_KEY: "test-key",
+        },
+        fetchImpl: async () => ({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    status: "needs_person",
+                    reason: "support would help but not direct self-harm",
+                  }),
+                },
+              },
+            ],
+          }),
+        }),
+      },
+    );
+
+    assert.equal(result.status, "needs_person");
+    assert.equal(result.llm.used, true);
   });
 
   it("uses a valid LLM-generated plan from sanitized context", async () => {

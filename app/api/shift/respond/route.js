@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { respondToShift } from "../../../../lib/urgeshift/planEngine.js";
-import { suggestActivityWithLlm } from "../../../../lib/urgeshift/llm.js";
+import { getLlmRuntimeDebug, suggestActivityWithLlm } from "../../../../lib/urgeshift/llm.js";
 
 async function readJson(request) {
   try {
@@ -14,13 +14,17 @@ export async function POST(request) {
   const body = await readJson(request);
   const result = respondToShift(body);
   const response = body.response || body.action || "next";
+  const includeDebug = body.debug === true;
   const shouldAskLlm =
     !result.safety?.crisis &&
     !body.selectedOption &&
     !["done", "helped", "stop", "person"].includes(response);
 
   if (!shouldAskLlm) {
-    return NextResponse.json(result);
+    return NextResponse.json({
+      ...result,
+      ...(includeDebug ? { llmDebug: getLlmRuntimeDebug() } : {}),
+    });
   }
 
   const suggestion = await suggestActivityWithLlm({
@@ -33,6 +37,7 @@ export async function POST(request) {
     ...result,
     action: suggestion.action,
     llm: suggestion.llm,
+    ...(includeDebug ? { llmDebug: getLlmRuntimeDebug() } : {}),
     reasonCodes: suggestion.llm.used
       ? [...new Set([...(result.reasonCodes || []), "llm-activity"])]
       : result.reasonCodes,

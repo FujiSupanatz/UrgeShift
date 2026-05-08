@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { detectSafetyRisk } from "../../../../lib/urgeshift/safety.js";
+import { classifyCrisisWithLlm } from "../../../../lib/urgeshift/llm.js";
 
 async function readJson(request) {
   try {
@@ -11,13 +11,13 @@ async function readJson(request) {
 
 export async function POST(request) {
   const body = await readJson(request);
-  const safety = detectSafetyRisk({
-    freeSignal: body.text,
-    typedSignal: body.text,
+  const result = await classifyCrisisWithLlm({
+    text: body.text,
   });
 
   return NextResponse.json({
-    status: safety.crisis ? "crisis" : "safe",
-    reasons: safety.reasons,
+    status: result.status,
+    source: "typhoon-next-stateless",
+    llm: result.llm,
   });
 }

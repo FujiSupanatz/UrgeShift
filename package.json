@@ -8,8 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --test",
-    "test:vercel-api": "python -m unittest tests.test_vercel_api_smoke"
+    "test": "node --test"
   },
   "dependencies": {
     "next": "^15.3.0",

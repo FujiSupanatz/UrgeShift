@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
-import { respondToShift } from "../../../../lib/urgeshift/planEngine.js";
+import { buddyDraft as fallbackBuddyDraft } from "../../../../lib/urgeshift/actions.js";
+import { createBuddyDraftWithLlm } from "../../../../lib/urgeshift/llm.js";
 
-export async function POST() {
-  const result = respondToShift({
-    response: "person",
-    context: {
-      blocker: "need person",
-    },
+async function readJson(request) {
+  try {
+    return await request.json();
+  } catch {
+    return {};
+  }
+}
+
+export async function POST(request) {
+  const body = await readJson(request);
+  const result = await createBuddyDraftWithLlm({
+    fallbackDraft: fallbackBuddyDraft,
+    blocker: body.blocker,
+    urge: body.urge,
+    energy: body.energy,
   });
 
   return NextResponse.json({
-    draft: result.buddyDraft,
-    action: result.action,
+    draft: result.draft,
+    source: "typhoon-next-stateless",
     saveAllowed: false,
+    llm: result.llm,
   });
 }

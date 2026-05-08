@@ -22,7 +22,6 @@ Core idea:
 - React 19
 - local browser storage for privacy-first user state
 - dynamic API routes under `app/api/*`
-- root Python `api/*` functions kept Vercel-compatible
 
 ## Local Development
 
@@ -55,10 +54,13 @@ npm run start
 Optional LLM-backed features use Typhoon-compatible env vars:
 
 ```bash
+URGESHIFT_LLM_API_KEY=...
 TYPHOON_API_KEY=...
 TYPHOON_BASE_URL=https://api.opentyphoon.ai/v1
 TYPHOON_MODEL=typhoon-v2.5-30b-a3b-instruct
 ```
+
+`URGESHIFT_LLM_API_KEY` is preferred. `TYPHOON_API_KEY` remains supported as fallback.
 
 Recommended local setup:
 
@@ -70,16 +72,10 @@ If no API key is present, the app falls back to rule-based behavior.
 
 ## Tests
 
-Backend plan engine tests:
+App + API logic tests:
 
 ```bash
 npm test
-```
-
-Vercel Python API smoke test:
-
-```bash
-npm run test:vercel-api
 ```
 
 ## Deployment
@@ -88,7 +84,6 @@ This repo is set up for Vercel:
 
 - `vercel.json` uses the Next.js framework build
 - `app/api/*` provides Next server routes
-- root `api/` is packaged for Vercel Python function compatibility
 
 Before deploy, verify:
 
@@ -96,7 +91,6 @@ Before deploy, verify:
 rm -rf .next
 npm run build
 npm test
-npm run test:vercel-api
 ```
 
 ## Important Product Constraints

@@ -16,7 +16,7 @@ export const actions = {
   },
   water: {
     mode: "แรงน้อยก็ทำได้ / Low-effort next move",
-    text: "ซื้อน้ำก่อน ยังไม่ต้องสัญญาอะไร",
+    text: "กินน้ำก่อน ยังไม่ต้องคิดอะไรมาก",
     subtext: "Delay by 10 minutes. แค่ก้าวถัดไป ไม่ใช่ทั้งชีวิต"
   },
   harm: {
