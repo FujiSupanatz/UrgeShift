@@ -44,14 +44,21 @@ button {
   cursor: pointer;
 }
 
+a {
+  color: inherit;
+}
+
 .stage {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(320px, 1.25fr) minmax(300px, 0.75fr);
-  gap: clamp(18px, 3vw, 44px);
+  grid-template-columns: minmax(320px, 760px);
+  grid-template-rows: auto auto;
+  gap: 18px;
   padding: clamp(18px, 3vw, 46px);
   position: relative;
   overflow: hidden;
+  justify-content: center;
+  align-content: center;
 }
 
 .stage::before {
@@ -72,6 +79,7 @@ button {
   display: grid;
   grid-template-rows: auto 1fr;
   gap: clamp(18px, 3vw, 34px);
+  z-index: 2;
 }
 
 .brand-row {
@@ -130,6 +138,7 @@ button {
   box-shadow: var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.3);
   align-self: center;
+  justify-self: center;
 }
 
 .status-bar {
@@ -224,7 +233,20 @@ button {
 .privacy-note {
   color: rgba(20, 18, 15, 0.64);
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 12px;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  color: var(--signal-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
 }
 
 .timer-band {
@@ -238,8 +260,14 @@ button {
 .timer-band strong {
   display: block;
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 8vw, 5rem);
-  line-height: 0.9;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 0.95;
+}
+
+.timer-band p {
+  margin: 10px 0 0;
+  color: rgba(20, 18, 15, 0.62);
+  line-height: 1.45;
 }
 
 .pulse-ring {
@@ -289,7 +317,6 @@ button {
 .button-grid button,
 .chip-row button,
 .panel-actions button,
-.signal-row button,
 .saved-plan button {
   min-height: 48px;
   border: 1px solid rgba(20, 18, 15, 0.2);
@@ -299,10 +326,104 @@ button {
   transition: background 160ms ease, transform 160ms ease, border-color 160ms ease;
 }
 
+.plans-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 3vw, 46px);
+  color: var(--ink);
+}
+
+.plans-shell {
+  width: min(100%, 980px);
+  min-height: 70vh;
+  border-radius: 34px;
+  padding: clamp(20px, 4vw, 42px);
+  background:
+    linear-gradient(145deg, rgba(244, 234, 214, 0.98), rgba(228, 212, 184, 0.95)),
+    var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.plans-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 22px;
+}
+
+.plans-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 7vw, 5.6rem);
+  line-height: 0.92;
+  margin: 0 0 12px;
+}
+
+.plans-header p:last-child {
+  margin: 0;
+  color: rgba(20, 18, 15, 0.66);
+}
+
+.plan-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.plan-tabs button,
+.plan-actions button {
+  min-height: 44px;
+  border: 1px solid rgba(20, 18, 15, 0.2);
+  border-radius: 999px;
+  padding: 0 16px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.plan-tabs button.active,
+.plan-actions button.active {
+  color: white;
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.plan-list {
+  display: grid;
+  gap: 14px;
+}
+
+.empty-plan,
+.plan-card {
+  border: 1px solid rgba(20, 18, 15, 0.14);
+  border-radius: 22px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.empty-plan h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0 0 8px;
+}
+
+.empty-plan p,
+.plan-card p {
+  color: rgba(20, 18, 15, 0.7);
+  line-height: 1.55;
+}
+
+.plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .button-grid button:hover,
 .chip-row button:hover,
 .panel-actions button:hover,
-.signal-row button:hover,
 .saved-plan button:hover {
   transform: translateY(-1px);
   border-color: rgba(20, 18, 15, 0.42);
@@ -364,40 +485,56 @@ button {
 
 .right-pane {
   display: grid;
-  align-content: center;
-  gap: 16px;
-  color: var(--paper);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: flex-start;
+  gap: 1px;
+  color: var(--ink);
+  min-height: 0;
+  width: min(100%, 760px);
+  justify-self: center;
+  margin-top: 0;
+  padding: 12px;
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(244, 234, 214, 0.92), rgba(216, 198, 165, 0.92)),
+    var(--paper-deep);
+  box-shadow: 22px 26px 80px rgba(14, 16, 20, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .right-pane section {
-  border: 1px solid rgba(244, 234, 214, 0.2);
-  background: rgba(244, 234, 214, 0.08);
-  backdrop-filter: blur(14px);
-  padding: 20px;
+  border: 0;
+  border-right: 1px solid rgba(20, 18, 15, 0.12);
+  background: transparent;
+  backdrop-filter: none;
+  padding: 14px;
+}
+
+.right-pane section:last-child {
+  border-right: 0;
 }
 
 .demo-brief {
-  border-radius: 28px 28px 8px 28px;
+  border-radius: 0;
 }
 
 .state-board,
 .manual-signal,
 .saved-plan {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .demo-brief h2 {
-  font-size: clamp(1.6rem, 3vw, 2.7rem);
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
   line-height: 1;
   margin: 0 0 14px;
 }
 
 .demo-brief p:last-child,
-.manual-signal label,
 #signalHint,
 #savedPlanText {
   line-height: 1.55;
-  color: rgba(244, 234, 214, 0.76);
+  color: rgba(20, 18, 15, 0.66);
 }
 
 .state-board dl {
@@ -411,12 +548,12 @@ button {
   grid-template-columns: 92px minmax(0, 1fr);
   gap: 10px;
   align-items: baseline;
-  border-bottom: 1px solid rgba(244, 234, 214, 0.14);
+  border-bottom: 1px solid rgba(20, 18, 15, 0.12);
   padding-bottom: 10px;
 }
 
 .state-board dt {
-  color: rgba(244, 234, 214, 0.52);
+  color: rgba(20, 18, 15, 0.52);
 }
 
 .state-board dd {
@@ -424,30 +561,41 @@ button {
   font-weight: 700;
 }
 
-.signal-row {
+.context-fields {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
 }
 
-.signal-row input {
-  min-height: 48px;
-  border: 1px solid rgba(244, 234, 214, 0.24);
-  border-radius: 999px;
-  padding: 0 16px;
-  color: var(--paper);
-  background: rgba(0, 0, 0, 0.22);
+.context-fields label {
+  display: grid;
+  gap: 6px;
 }
 
-.signal-row input::placeholder {
-  color: rgba(244, 234, 214, 0.38);
+.context-fields span {
+  color: rgba(20, 18, 15, 0.58);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
-.signal-row button,
+.context-fields input,
+.context-fields textarea {
+  width: 100%;
+  border: 1px solid rgba(20, 18, 15, 0.18);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.context-fields textarea {
+  min-height: 74px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
 .saved-plan button {
   padding: 0 18px;
-  color: var(--paper);
+  color: white;
   background: rgba(255, 90, 31, 0.7);
   border-color: rgba(255, 90, 31, 0.5);
 }
@@ -460,7 +608,9 @@ button {
 @media (max-width: 920px) {
   .stage {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
     padding: 16px;
+    gap: 16px;
   }
 
   .stage::before {
@@ -469,10 +619,20 @@ button {
 
   .phone-shell {
     min-height: auto;
+    border-radius: 24px;
   }
 
   .right-pane {
-    align-content: start;
+    grid-template-columns: 1fr;
+    align-content: flex-start;
+    min-height: auto;
+    margin-top: 0;
+    border-radius: 24px;
+  }
+
+  .right-pane section {
+    border-right: 0;
+    border-bottom: 1px solid rgba(20, 18, 15, 0.14);
   }
 }
 
@@ -504,6 +664,10 @@ button {
 
   .timer-band strong {
     font-size: 3rem;
+  }
+
+  .plans-header {
+    display: grid;
   }
 }
 
