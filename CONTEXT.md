@@ -30,6 +30,26 @@ A one-tap signal collected after the first move has started. Context crumbs repl
 
 Optional user-editable session context such as name, place, and what is happening now. Current context supports tailoring, but UrgeShift must still work without it.
 
+### Background Quiz
+
+An optional lightweight quiz that gathers stable user context before an urge moment. Its output must be structured so a backend LLM can use it later as preference and support context, while UrgeShift still works if the user skips it.
+
+### Personal Helper Spirit
+
+Thai term: `ธูติประจำตัว`. A shareable, Thai-casual persona result from the Background Quiz. It represents how the app should help the user during an urge moment. It is not a diagnosis or fixed personality label.
+
+### Printable Schedule
+
+A user-owned, printable plan output for saved 10-minute plans. Use this when privacy matters more than long-term storage. UrgeShift should prefer session-only storage and printable/exportable artifacts over persistent user-data storage.
+
+### Better Self Preview
+
+Thai term: `ตัวเราที่ค่อยๆ กลับมาคุมได้`. A visual preview that shows possible near-term shifts after one safer next move. It is not a prediction, diagnosis, or outcome guarantee.
+
+### Spirit Stage Image
+
+An image asset for a `ธูติประจำตัว` at a Better Self Preview time stage. File naming convention is `/spirits/{spirit}_{stage}.png`, for example `/spirits/spark_now.png`, `/spirits/spark_10mins.png`, `/spirits/spark_today.png`, and `/spirits/spark_7days.png`.
+
 ### Escape Hatch
 
 A user-controlled response to an action card, such as `Done`, `Too hard`, `Different`, `I need a person`, or `Stop`.
