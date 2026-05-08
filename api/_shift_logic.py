@@ -51,6 +51,7 @@ CRISIS_WORDS = ["kill myself", "suicide", "overdose", "can't stay safe", "hurt m
 NEEDS_PERSON_WORDS = ["need a person", "ขอคนช่วย", "stay with me", "help me"]
 ALLOWED_EVENTS = {
     "start",
+    "checkin",
     "done",
     "too-hard",
     "different",
@@ -89,6 +90,17 @@ def choose_action(payload):
     event = payload.get("event") if payload.get("event") in ALLOWED_EVENTS else "start"
     value = payload.get("value").lower() if isinstance(payload.get("value"), str) else ""
     blocker = payload.get("blocker").lower() if isinstance(payload.get("blocker"), str) else ""
+    urgency = payload.get("urgency").lower() if isinstance(payload.get("urgency"), str) else ""
+    requested_help = payload.get("requested_help").lower() if isinstance(payload.get("requested_help"), str) else ""
+
+    if event == "checkin":
+        if "ไม่ไหวแล้ว" in urgency or "เสี่ยง" in urgency or "คนอยู่ด้วย" in requested_help:
+            return ACTIONS["crisis"]
+        if "เงียบ" in requested_help:
+            return ACTIONS["downshift"]
+        if "แผน" in requested_help:
+            return ACTIONS["water"]
+        return ACTIONS["first"]
 
     if event == "too-hard" or "too hard" in blocker:
         return ACTIONS["downshift"]

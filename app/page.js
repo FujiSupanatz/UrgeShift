@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import BrandHeader from "./components/BrandHeader";
 import ContextPanel from "./components/ContextPanel";
@@ -85,6 +86,11 @@ export default function Home() {
     if (crumbStep === null) return null;
     return crumbSteps[crumbStep] ?? null;
   }, [crumbStep]);
+
+  useEffect(() => {
+    const stored = window.sessionStorage.getItem("urgeshift-plan");
+    if (stored) setSavedPlan(stored);
+  }, []);
 
   useEffect(() => {
     if (!active || seconds === 0) return undefined;
@@ -365,13 +371,27 @@ export default function Home() {
   }
 
   function savePlan() {
+    const plans = JSON.parse(window.sessionStorage.getItem("urgeshift-plans") || "[]");
+    const nextPlans = [
+      {
+        id: Date.now(),
+        text: planPreview,
+        cadence: "daily",
+        createdAt: new Date().toISOString()
+      },
+      ...plans
+    ];
+    window.sessionStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
+    window.sessionStorage.setItem("urgeshift-plan", planPreview);
     setSavedPlan(planPreview);
     setSaveVisible(false);
     setSessionStatus("session plan ready");
   }
 
   function clearPlan() {
-    setSavedPlan("No current session plan yet.");
+    window.sessionStorage.removeItem("urgeshift-plan");
+    window.sessionStorage.removeItem("urgeshift-plans");
+    setSavedPlan("No plan saved yet.");
   }
 
   function updateContext(field, value) {
@@ -401,7 +421,24 @@ export default function Home() {
         <BrandHeader />
         <PhoneShell status={apiBusy ? "shaping move" : sessionStatus} active={active}>
           {!active ? (
-            <IdleScreen onStart={startSession} />
+            <section className="screen active">
+              <div className="promise">
+                <p className="tiny-label">เพื่อนที่คอยอยู่ข้างคุณเสมอ</p>
+                <h2>ตอนใจเริ่มหลุด ไม่ต้องอธิบาย แค่ Shift.</h2>
+              </div>
+              <button className="shift-button" type="button" onClick={startSession}>
+                <span>Shift Now</span>
+                <small>เริ่มก้าวแรก</small>
+              </button>
+              <p className="privacy-note">
+                ข้อมูลของผู้ใช้ จะหายไปหลังจากออกแอพโดยอัตโนมัติ
+              </p>
+              <div className="link-row">
+                <Link className="text-link" href="/context">ทำ quiz สั้นๆ / Context quiz</Link>
+                <Link className="text-link" href="/preview">ดูตัวเราที่ค่อยๆ กลับมา / Preview</Link>
+                <Link className="text-link" href="/plans">ดูแผนที่บันทึกไว้ / Saved plans</Link>
+              </div>
+            </section>
           ) : (
             <SessionScreen
               currentAction={currentAction}
@@ -425,9 +462,53 @@ export default function Home() {
       </section>
 
       <aside className="right-pane" aria-label="Session context and state">
-        <ContextPanel context={currentContext} onChange={updateContext} />
-        <StateBoard urge={urge} energy={energy} blocker={blocker} mode={mode} />
-        <SavedPlanPanel savedPlan={savedPlan} onClear={clearPlan} />
+        <section className="demo-brief">
+          <p className="tiny-label">บริบทตอนนี้ / current state</p>
+          <div className="context-fields">
+            <label>
+              <span>ชื่อ / Name</span>
+              <input
+                type="text"
+                value={currentContext.name}
+                onChange={(event) => updateContext("name", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>ที่ไหน / Place</span>
+              <input
+                type="text"
+                value={currentContext.place}
+                onChange={(event) => updateContext("place", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>ตอนนี้เกิดอะไรขึ้น / Situation</span>
+              <textarea
+                value={currentContext.situation}
+                onChange={(event) => updateContext("situation", event.target.value)}
+              />
+            </label>
+          </div>
+        </section>
+
+        <section className="state-board">
+          <p className="tiny-label">สรุปบริบท / Context Crumbs</p>
+          <dl>
+            <div><dt>urge</dt><dd>{urge}</dd></div>
+            <div><dt>แรง</dt><dd>{energy}</dd></div>
+            <div><dt>ติดขัด</dt><dd>{blocker}</dd></div>
+            <div><dt>โหมด</dt><dd>{mode}</dd></div>
+          </dl>
+        </section>
+
+        <section className="saved-plan">
+          <p className="tiny-label">แผนที่บันทึก / Saved plan</p>
+          <div>{savedPlan}</div>
+          <Link className="text-link" href="/context">อัปเดตพื้นหลัง / Context quiz</Link>
+          <Link className="text-link" href="/preview">ดู Better Self Preview</Link>
+          <Link className="text-link" href="/plans">เปิดแผนทั้งหมด / Open plans</Link>
+          <button type="button" onClick={clearPlan}>ล้างแผน</button>
+        </section>
       </aside>
     </main>
   );

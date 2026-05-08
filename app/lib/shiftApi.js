@@ -54,6 +54,17 @@ export async function recommendShift(payload, fallbackAction) {
   );
 }
 
+export async function recommendCheckInShift(payload, fallbackAction) {
+  try {
+    return await postJson("/api/shift/recommend", {
+      ...payload,
+      event: "checkin",
+    });
+  } catch {
+    return { action: fallbackAction };
+  }
+}
+
 export async function fetchBuddyDraft(fallbackDraft) {
   const result = await respondToShift(
     {
