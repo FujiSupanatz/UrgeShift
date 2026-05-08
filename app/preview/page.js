@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import AppTabBar from "../components/AppTabBar";
 
 const profiles = {
   spark: {
@@ -100,11 +100,6 @@ export default function PreviewPage() {
   return (
     <main className="preview-page">
       <section className="preview-shell">
-        <nav className="quiz-nav">
-          <Link className="text-link" href="/">กลับ / Back</Link>
-          <Link className="text-link" href="/context">เลือกธูติ / Quiz</Link>
-        </nav>
-
         <section className="preview-hero">
           <p className="eyebrow">Better Self Preview</p>
           <h1>ตัวเราที่ค่อยๆ กลับมาคุมได้</h1>
@@ -145,6 +140,8 @@ export default function PreviewPage() {
             ))}
           </div>
         </section>
+
+        <AppTabBar />
       </section>
     </main>
   );

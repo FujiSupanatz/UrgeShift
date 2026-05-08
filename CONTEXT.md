@@ -42,6 +42,30 @@ Thai term: `ธูติประจำตัว`. A shareable, Thai-casual pers
 
 A user-owned, printable plan output for saved 10-minute plans. Use this when privacy matters more than long-term storage. UrgeShift should prefer session-only storage and printable/exportable artifacts over persistent user-data storage.
 
+### Hardcore Mode
+
+An optional opt-in mode for users who want ongoing structure beyond a private urge session. Hardcore Mode may use persistent profile and history for features such as streaks, scheduled check-ins, and comparative progress views. It must remain separate from the privacy-first core UrgeShift flow.
+
+### Progress Board
+
+A private self-tracking board inside Hardcore Mode. It shows personal consistency and recent helpful actions such as completed check-ins, plan follow-through, and streaks. It is not a public competition surface.
+
+### MVP Metrics
+
+A demo-facing readout derived from the same local event model as the Progress Board. MVP Metrics exist to explain usage quality and loop completion to judges, while the Progress Board remains the primary user-facing surface. In the product UI, MVP Metrics should appear as a secondary, collapsible section inside `Progress`.
+
+### Scheduled Check-In
+
+An opt-in self-check-in inside Hardcore Mode. The user chooses when it should appear, and the app asks for a short structured response that can be skipped or snoozed. It is user-controlled, not passive sensing or unsolicited inference.
+
+### Local Name
+
+A user-chosen name stored only on the current device for Hardcore Mode. It gives the self-check-in and Progress Board a personal tone without requiring an account or backend identity.
+
+### Tab Bar
+
+The primary product navigation for the MVP. It uses five top-level destinations: `Shift`, `ธูติ`, `Preview`, `Plans`, and `Progress`. The `ธูติ` tab is the short UI label for the `ธูติประจำตัว` flow.
+
 ### Better Self Preview
 
 Thai term: `ตัวเราที่ค่อยๆ กลับมาคุมได้`. A visual preview that shows possible near-term shifts after one safer next move. It is not a prediction, diagnosis, or outcome guarantee.

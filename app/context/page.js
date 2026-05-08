@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
+import AppTabBar from "../components/AppTabBar";
 
 const traits = ["spark", "mist", "sprout", "water", "wind", "light"];
 
@@ -216,11 +216,6 @@ export default function ContextQuizPage() {
   return (
     <main className="quiz-page">
       <section className="quiz-shell">
-        <nav className="quiz-nav">
-          <Link className="text-link" href="/">กลับ / Back</Link>
-          <Link className="text-link" href="/plans">แผน / Plans</Link>
-        </nav>
-
         {!started ? (
           <section className="quiz-hero">
             <p className="eyebrow">Context quiz</p>
@@ -284,8 +279,6 @@ export default function ContextQuizPage() {
               <button type="button" onClick={copyImagePrompt}>คัดลอก prompt ภาพ</button>
               <button type="button" onClick={() => window.print()}>พิมพ์ตาราง / Print schedule</button>
               <button type="button" onClick={start}>ทำใหม่ / Restart</button>
-              <Link className="text-link" href="/preview">ดูตัวเราที่ค่อยๆ กลับมา</Link>
-              <Link className="text-link" href="/">ไป Shift Now</Link>
             </div>
             <section className="print-schedule">
               <h2>ตารางพิมพ์ไว้ใช้เอง</h2>
@@ -313,6 +306,8 @@ export default function ContextQuizPage() {
             </section>
           </section>
         ) : null}
+
+        <AppTabBar />
       </section>
     </main>
   );
