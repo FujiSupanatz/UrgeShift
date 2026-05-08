@@ -758,6 +758,17 @@ a {
   gap: 16px;
 }
 
+.result-identity {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.result-spirit {
+  min-height: 280px;
+}
+
 .result-card h1 {
   margin: 0;
   font-size: clamp(2.2rem, 6vw, 4.8rem);
@@ -1452,6 +1463,7 @@ a {
   .progress-grid,
   .quiz-choices,
   .trait-grid,
+  .result-identity,
   .checkin-choices,
   .metric-grid {
     grid-template-columns: 1fr;
@@ -1514,6 +1526,10 @@ a {
     display: none !important;
   }
 
+  .share-copy {
+    display: none !important;
+  }
+
   .quiz-page {
     display: block;
     padding: 0;
@@ -1538,6 +1554,12 @@ a {
   .print-schedule {
     break-inside: avoid;
     background: white;
+  }
+
+  .result-spirit {
+    min-height: 220px;
+    background: white;
+    border: 1px solid rgba(20, 18, 15, 0.14);
   }
 
   .plan-list--screen,

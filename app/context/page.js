@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppTabBar from "../components/AppTabBar";
 
 const traits = ["spark", "mist", "sprout", "water", "wind", "light"];
@@ -146,11 +146,17 @@ export default function ContextQuizPage() {
   const [selected, setSelected] = useState(null);
   const [done, setDone] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [imageMissing, setImageMissing] = useState(false);
 
   const scores = useMemo(() => buildScores(answers), [answers]);
   const resultKey = useMemo(() => chooseResult(scores), [scores]);
   const result = results[resultKey];
   const question = questions[index];
+  const resultImagePath = `/spirits/${resultKey}_today.png`;
+
+  useEffect(() => {
+    setImageMissing(false);
+  }, [resultKey]);
 
   function start() {
     setStarted(true);
@@ -208,11 +214,6 @@ export default function ContextQuizPage() {
     setCopied(true);
   }
 
-  async function copyImagePrompt() {
-    await navigator.clipboard.writeText(result.imagePrompt);
-    setCopied(true);
-  }
-
   return (
     <main className="quiz-page">
       <section className="quiz-shell">
@@ -258,9 +259,26 @@ export default function ContextQuizPage() {
         {done ? (
           <section className="result-card">
             <p className="eyebrow">ผลลัพธ์ / Result</p>
-            <h1>{result.title}</h1>
-            <h2>{result.oneLine}</h2>
-            <p>{result.card}</p>
+            <div className="result-identity">
+              <div className={`spirit-frame result-spirit ${resultKey === "spark" ? "ember" : resultKey}`}>
+                {!imageMissing ? (
+                  <img
+                    src={resultImagePath}
+                    alt={result.title}
+                    onError={() => setImageMissing(true)}
+                  />
+                ) : (
+                  <div className="spirit-fallback" aria-label={`${result.title} fallback`}>
+                    <span />
+                  </div>
+                )}
+              </div>
+              <div>
+                <h1>{result.title}</h1>
+                <h2>{result.oneLine}</h2>
+                <p>{result.card}</p>
+              </div>
+            </div>
             <div className="trait-grid">
               {traits.map((trait) => (
                 <div key={trait}>
@@ -272,40 +290,11 @@ export default function ContextQuizPage() {
             <div className="share-copy">
               <p>{result.share}</p>
             </div>
-            <div className="prompt-box">
-              <p className="tiny-label">Prompt สำหรับสร้างภาพภูติ</p>
-              <code>{result.imagePrompt}</code>
-            </div>
             <div className="quiz-actions">
               <button type="button" onClick={copyShare}>{copied ? "คัดลอกแล้ว" : "คัดลอกการ์ด / Copy"}</button>
-              <button type="button" onClick={copyImagePrompt}>คัดลอก prompt ภาพ</button>
-              <button type="button" onClick={() => window.print()}>พิมพ์ตาราง / Print schedule</button>
+              <button type="button" onClick={() => window.print()}>พิมพ์ผลลัพธ์ / Print</button>
               <button type="button" onClick={start}>ทำใหม่ / Restart</button>
             </div>
-            <section className="print-schedule">
-              <h2>ตารางพิมพ์ไว้ใช้เอง</h2>
-              <p>ไม่ต้องเก็บข้อมูลข้าม session. พิมพ์หรือเซฟ PDF ไว้เอง.</p>
-              <table>
-                <thead>
-                  <tr>
-                    <th>เวลา</th>
-                    <th>urge / จุดเสี่ยง</th>
-                    <th>ให้ภูติช่วยแบบไหน</th>
-                    <th>ทำแล้ว</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {["เช้า", "บ่าย", "เย็น", "ก่อนนอน"].map((slot) => (
-                    <tr key={slot}>
-                      <td>{slot}</td>
-                      <td></td>
-                      <td>{result.oneLine}</td>
-                      <td></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
           </section>
         ) : null}
 
