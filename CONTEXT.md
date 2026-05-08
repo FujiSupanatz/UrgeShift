@@ -18,9 +18,17 @@ The primary action in UrgeShift. It starts a private urge-interruption session i
 
 The first safe, low-effort intervention shown immediately after `Shift Now`, before the system knows the user's urge category or personal history.
 
+### First Pause
+
+The opening 90-second urge-interruption window after `Shift Now`. It is a product rhythm, not necessarily a visible countdown. The UI may show calm progress instead of numeric time to avoid pressure.
+
 ### Context Crumb
 
 A one-tap signal collected after the first move has started. Context crumbs replace forms and long check-ins during an urge moment.
+
+### Current Context
+
+Optional user-editable session context such as name, place, and what is happening now. Current context supports tailoring, but UrgeShift must still work without it.
 
 ### Escape Hatch
 
@@ -38,12 +46,17 @@ A low-readiness flow used when the user says or signals that they will do the be
 
 An optional saved if-then plan created only after something helped. It stores the useful action pattern, not raw sensitive transcripts by default.
 
+### Plan Cadence
+
+The repetition rhythm for a saved plan. UrgeShift uses `Daily`, `Every other day`, and `Weekly`. Avoid `bi-daily` because it can mean either twice daily or every two days.
+
 ### Buddy Bridge
 
 A user-controlled message draft for asking another person to stay present during an urge moment. UrgeShift drafts only; it never auto-sends.
 
 ## Language Rules
 
+- UrgeShift UI is Thai-primary bilingual: Thai text comes first; English appears only as helper text where useful.
 - Say `urge interruption`, not `addiction treatment`.
 - Say `one safer next move`, not `therapy`.
 - Say `harm-reduction mode`, not `permission`.

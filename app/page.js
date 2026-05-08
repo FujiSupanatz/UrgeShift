@@ -1,41 +1,42 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 const actions = {
   first: {
-    mode: "No-context first move",
-    text: "Move 20 steps away from where you are.",
-    subtext: "No need to decide anything yet."
+    mode: "เริ่มช่วยทันที / No-context first move",
+    text: "ขยับออกไป 20 ก้าว",
+    subtext: "Move 20 steps away. ยังไม่ต้องตัดสินใจอะไรตอนนี้"
   },
   downshift: {
-    mode: "Too hard downshift",
-    text: "Turn away from the entrance. Hold your phone with both hands. Breathe once.",
-    subtext: "This still counts. Smaller is the point."
+    mode: "ลดให้เล็กลง / Too hard downshift",
+    text: "หันออกจากทางเข้า จับโทรศัพท์สองมือ หายใจหนึ่งครั้ง",
+    subtext: "This still counts. เล็กลงคือจุดประสงค์"
   },
   different: {
-    mode: "Different move",
-    text: "Put one object between you and the cue.",
-    subtext: "A door, a table, a bottle of water, anything that adds friction."
+    mode: "เปลี่ยนวิธี / Different move",
+    text: "วางอะไรสักอย่างคั่นระหว่างคุณกับสิ่งกระตุ้น",
+    subtext: "A door, table, water bottle. เพิ่มแรงเสียดทานนิดเดียวพอ"
   },
   water: {
-    mode: "Low-effort next move",
-    text: "Buy water first. No promise. Delay the first drink by 10 minutes.",
-    subtext: "You are not negotiating your whole life. Just the next move."
+    mode: "แรงน้อยก็ทำได้ / Low-effort next move",
+    text: "ซื้อน้ำก่อน ยังไม่ต้องสัญญาอะไร",
+    subtext: "Delay by 10 minutes. แค่ก้าวถัดไป ไม่ใช่ทั้งชีวิต"
   },
   harm: {
-    mode: "Harm-reduction mode",
-    text: "Okay. Let's make the next 10 minutes safer first.",
-    subtext: "Pick one damage-reducing move. No lecture."
+    mode: "ลดอันตราย / Harm-reduction mode",
+    text: "โอเค งั้นทำ 10 นาทีถัดไปให้ปลอดภัยขึ้นก่อน",
+    subtext: "Pick one safer move. ไม่มีการสอน ไม่มีการดุ"
   },
   crisis: {
-    mode: "Crisis gate",
-    text: "This needs a person, not a coaching loop.",
+    mode: "ขอคนช่วย / Crisis gate",
+    text: "เรื่องนี้ควรมีคนจริงอยู่ด้วย ไม่ใช่คุยกับแอปต่อ",
     subtext: "If you may not stay safe, contact emergency support or someone nearby now."
   },
   stopped: {
-    mode: "Session stopped",
-    text: "No shame. You can leave now or start again.",
+    mode: "หยุดเซสชัน / Session stopped",
+    text: "ไม่ต้องรู้สึกผิด จะออกตอนนี้หรือเริ่มใหม่ก็ได้",
     subtext: "Stopping is user control, not failure."
   }
 };
@@ -43,28 +44,22 @@ const actions = {
 const crumbSteps = [
   {
     key: "urge",
-    prompt: "What kind of urge?",
-    options: ["Drink", "Vape", "Scroll", "Gamble", "Other"]
+    prompt: "urge แบบไหน / What kind?",
+    options: ["ดื่ม / Drink", "สูบ / Vape", "ไถฟีด / Scroll", "พนัน / Gamble", "อื่นๆ / Other"]
   },
   {
     key: "energy",
-    prompt: "Energy right now?",
-    options: ["No talking", "Tiny action", "Can talk"]
+    prompt: "แรงตอนนี้ / Energy?",
+    options: ["ไม่คุย / No talking", "ทำเล็กๆ / Tiny action", "คุยได้ / Can talk"]
   },
   {
     key: "blocker",
-    prompt: "What blocked you?",
-    options: ["Too hard", "Wrong vibe", "Still want it", "Need person"]
+    prompt: "ติดตรงไหน / What blocked you?",
+    options: ["ยากเกินไป / Too hard", "ไม่ใช่ / Wrong vibe", "ยังอยากทำ / Still want it", "ขอคนช่วย / Need person"]
   }
 ];
 
-const harmReductionMoves = ["Eat first", "Buy water too", "Move away", "Set endpoint", "Message someone"];
-
-function formatTime(seconds) {
-  const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
-  const remainder = (seconds % 60).toString().padStart(2, "0");
-  return `${minutes}:${remainder}`;
-}
+const harmReductionMoves = ["กินก่อน / Eat first", "ซื้อน้ำด้วย / Buy water too", "ขยับออกไป / Move away", "ตั้งจุดหยุด / Set endpoint", "ทักใครสักคน / Message someone"];
 
 function normalize(value) {
   return value.toLowerCase();
@@ -84,8 +79,12 @@ export default function Home() {
   const [saveVisible, setSaveVisible] = useState(false);
   const [planPreview, setPlanPreview] = useState("");
   const [savedPlan, setSavedPlan] = useState("No plan saved yet.");
-  const [freeSignal, setFreeSignal] = useState("");
   const [copyText, setCopyText] = useState("Copy draft");
+  const [currentContext, setCurrentContext] = useState({
+    name: "Mint",
+    place: "หน้าร้านสะดวกซื้อ กรุงเทพฯ",
+    situation: "เลิกงานดึก เครียดมาก อยากดื่ม ไม่อยากอธิบาย"
+  });
 
   const buddyDraft =
     "Hey, I'm trying to get through a craving for 10 minutes.\n" +
@@ -141,7 +140,9 @@ export default function Home() {
   }
 
   function askToSavePlan(actionText = currentAction.text) {
-    setPlanPreview(`IF stress + night + cue nearby, THEN ${actionText.toLowerCase()} + wait 10 minutes.`);
+    setPlanPreview(
+      `ถ้า ${currentContext.situation || "urge กลับมา"} ที่ ${currentContext.place || "จุดกระตุ้น"} ให้ ${actionText.toLowerCase()} แล้วรอ 10 นาที.`
+    );
     setSaveVisible(true);
   }
 
@@ -167,12 +168,12 @@ export default function Home() {
     if (key === "energy") setEnergy(nextValue);
     if (key === "blocker") setBlocker(nextValue);
 
-    if (value === "Need person") {
+    if (value.includes("Need person")) {
       showBuddyBridge();
       return;
     }
 
-    if (value === "Still want it") {
+    if (value.includes("Still want it")) {
       setBlocker("still want it");
       showHarmReduction();
       return;
@@ -217,29 +218,18 @@ export default function Home() {
     }
   }
 
-  function handleSignal() {
-    const text = freeSignal.trim().toLowerCase();
-    if (!text) return;
-    if (!active) startSession();
-
-    const crisisWords = ["kill myself", "suicide", "overdose", "can't stay safe", "hurt myself"];
-    if (crisisWords.some((word) => text.includes(word))) {
-      applyAction(actions.crisis);
-      setSessionStatus("crisis gate");
-      setFreeSignal("");
-      return;
-    }
-
-    if (text.includes("anyway") || text.includes("drink") || text.includes("do it")) {
-      if (text.includes("drink")) setUrge("drink");
-      setBlocker("still want it");
-      showHarmReduction();
-    }
-
-    setFreeSignal("");
-  }
-
   function savePlan() {
+    const plans = JSON.parse(window.localStorage.getItem("urgeshift-plans") || "[]");
+    const nextPlans = [
+      {
+        id: Date.now(),
+        text: planPreview,
+        cadence: "daily",
+        createdAt: new Date().toISOString()
+      },
+      ...plans
+    ];
+    window.localStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
     window.localStorage.setItem("urgeshift-plan", planPreview);
     setSavedPlan(planPreview);
     setSaveVisible(false);
@@ -248,7 +238,15 @@ export default function Home() {
 
   function clearPlan() {
     window.localStorage.removeItem("urgeshift-plan");
+    window.localStorage.removeItem("urgeshift-plans");
     setSavedPlan("No plan saved yet.");
+  }
+
+  function updateContext(field, value) {
+    setCurrentContext((context) => ({
+      ...context,
+      [field]: value
+    }));
   }
 
   async function copyBuddy() {
@@ -269,7 +267,7 @@ export default function Home() {
           </div>
           <div>
             <p className="eyebrow">UrgeShift</p>
-            <h1>One tap between urge and regret.</h1>
+            <h1>ก่อนจะทำ ลอง...</h1>
           </div>
         </div>
 
@@ -282,23 +280,25 @@ export default function Home() {
           {!active ? (
             <section className="screen active">
               <div className="promise">
-                <p className="tiny-label">No login. No typing. No confession.</p>
-                <h2>When willpower goes offline, do not explain. Shift.</h2>
+                <p className="tiny-label">เพื่อนที่คอยอยู่ข้างคุณเสมอ</p>
+                <h2>ตอนใจเริ่มหลุด ไม่ต้องอธิบาย แค่ Shift.</h2>
               </div>
               <button className="shift-button" type="button" onClick={startSession}>
                 <span>Shift Now</span>
-                <small>start first move</small>
+                <small>เริ่มก้าวแรก</small>
               </button>
               <p className="privacy-note">
-                Demo stores only saved plans in this browser. Raw urge text is not saved.
+                ข้อมูลของผู้ใช้ จะหายไปหลังจากออกแอพโดยอัตโนมัติ
               </p>
+              <Link className="text-link" href="/plans">ดูแผนที่บันทึกไว้ / Saved plans</Link>
             </section>
           ) : (
             <section className="screen active">
               <div className="timer-band">
                 <div>
-                  <span className="tiny-label">First 90 seconds</span>
-                  <strong>{formatTime(seconds)}</strong>
+                  <span className="tiny-label">ช่วงแรก / first pause</span>
+                  <strong>ผ่านไปทีละก้าว</strong>
+                  <p>ไม่ต้องตัดสินใจทั้งชีวิตตอนนี้</p>
                 </div>
                 <div className="pulse-ring" aria-hidden="true" />
               </div>
@@ -310,12 +310,12 @@ export default function Home() {
               </article>
 
               <div className="button-grid" aria-label="Action responses">
-                <button type="button" onClick={() => handleEscape("done")}>Done</button>
-                <button type="button" data-intent="warm" onClick={() => handleEscape("too-hard")}>Too hard</button>
-                <button type="button" onClick={() => handleEscape("different")}>Different</button>
-                <button type="button" onClick={() => handleEscape("person")}>I need a person</button>
-                <button type="button" data-intent="warm" onClick={() => handleEscape("anyway")}>I&apos;ll do it anyway</button>
-                <button type="button" data-intent="quiet" onClick={() => handleEscape("stop")}>Stop</button>
+                <button type="button" onClick={() => handleEscape("done")}>ทำแล้ว</button>
+                <button type="button" data-intent="warm" onClick={() => handleEscape("too-hard")}>ยากเกินไป</button>
+                <button type="button" onClick={() => handleEscape("different")}>เปลี่ยนวิธี</button>
+                <button type="button" onClick={() => handleEscape("person")}>ขอคนช่วย</button>
+                <button type="button" data-intent="warm" onClick={() => handleEscape("anyway")}>ยังจะทำอยู่</button>
+                <button type="button" data-intent="quiet" onClick={() => handleEscape("stop")}>หยุด</button>
               </div>
 
               {currentCrumb ? (
@@ -333,7 +333,7 @@ export default function Home() {
 
               {mode === "harm-reduction mode" ? (
                 <div className="crumb-panel">
-                  <p className="tiny-label">Pick one safer move</p>
+                  <p className="tiny-label">เลือกหนึ่งอย่างที่ปลอดภัยขึ้น</p>
                   <div className="chip-row">
                     {harmReductionMoves.map((option) => (
                       <button key={option} type="button" onClick={() => {
@@ -349,15 +349,15 @@ export default function Home() {
 
               {buddyVisible ? (
                 <div className="buddy-panel">
-                  <p className="tiny-label">Buddy Bridge - draft only</p>
+                  <p className="tiny-label">ขอคนช่วย / Buddy Bridge - draft only</p>
                   <textarea value={buddyDraft} readOnly />
                   <div className="panel-actions">
-                    <button type="button" onClick={copyBuddy}>{copyText}</button>
+                    <button type="button" onClick={copyBuddy}>{copyText === "Copy draft" ? "คัดลอกข้อความ" : copyText}</button>
                     <button type="button" onClick={() => {
                       setBuddyVisible(false);
                       showCrumbs(crumbStep ?? 0);
                     }}>
-                      Keep shifting
+                      ไปต่อ
                     </button>
                   </div>
                 </div>
@@ -365,12 +365,12 @@ export default function Home() {
 
               {saveVisible ? (
                 <div className="save-panel">
-                  <p className="tiny-label">Save what helped</p>
-                  <h3>Save this as your 10-minute plan?</h3>
+                  <p className="tiny-label">บันทึกสิ่งที่ช่วยได้</p>
+                  <h3>บันทึกเป็นแผน 10 นาทีไหม?</h3>
                   <p>{planPreview}</p>
                   <div className="panel-actions">
-                    <button type="button" onClick={savePlan}>Save plan</button>
-                    <button type="button" onClick={() => setSaveVisible(false)}>Not now</button>
+                    <button type="button" onClick={savePlan}>บันทึกแผน</button>
+                    <button type="button" onClick={() => setSaveVisible(false)}>ยังไม่เอา</button>
                   </div>
                 </div>
               ) : null}
@@ -379,47 +379,51 @@ export default function Home() {
         </div>
       </section>
 
-      <aside className="right-pane" aria-label="Demo controls and state">
+      <aside className="right-pane" aria-label="Session context and state">
         <section className="demo-brief">
-          <p className="tiny-label">Demo persona</p>
-          <h2>Mint, 27, Bangkok. 10:45 PM. Near convenience store.</h2>
-          <p>Stressful workday. Craving 8/10. Low energy. Does not want to explain.</p>
+          <p className="tiny-label">บริบทตอนนี้ / current state</p>
+          <div className="context-fields">
+            <label>
+              <span>ชื่อ / Name</span>
+              <input
+                type="text"
+                value={currentContext.name}
+                onChange={(event) => updateContext("name", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>ที่ไหน / Place</span>
+              <input
+                type="text"
+                value={currentContext.place}
+                onChange={(event) => updateContext("place", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>ตอนนี้เกิดอะไรขึ้น / Situation</span>
+              <textarea
+                value={currentContext.situation}
+                onChange={(event) => updateContext("situation", event.target.value)}
+              />
+            </label>
+          </div>
         </section>
 
         <section className="state-board">
-          <p className="tiny-label">Context Crumbs</p>
+          <p className="tiny-label">สรุปบริบท / Context Crumbs</p>
           <dl>
-            <div><dt>Urge</dt><dd>{urge}</dd></div>
-            <div><dt>Energy</dt><dd>{energy}</dd></div>
-            <div><dt>Blocker</dt><dd>{blocker}</dd></div>
-            <div><dt>Mode</dt><dd>{mode}</dd></div>
+            <div><dt>urge</dt><dd>{urge}</dd></div>
+            <div><dt>แรง</dt><dd>{energy}</dd></div>
+            <div><dt>ติดขัด</dt><dd>{blocker}</dd></div>
+            <div><dt>โหมด</dt><dd>{mode}</dd></div>
           </dl>
         </section>
 
-        <section className="manual-signal">
-          <p className="tiny-label">Optional typed signal</p>
-          <label htmlFor="freeSignal">Use for crisis gate / low-readiness demo</label>
-          <div className="signal-row">
-            <input
-              id="freeSignal"
-              type="text"
-              autoComplete="off"
-              placeholder="e.g. I'm going to drink anyway"
-              value={freeSignal}
-              onChange={(event) => setFreeSignal(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") handleSignal();
-              }}
-            />
-            <button type="button" onClick={handleSignal}>Send</button>
-          </div>
-          <p id="signalHint">Try: &quot;I&apos;m going to drink anyway&quot; or crisis-like wording.</p>
-        </section>
-
         <section className="saved-plan">
-          <p className="tiny-label">Saved plan</p>
+          <p className="tiny-label">แผนที่บันทึก / Saved plan</p>
           <div>{savedPlan}</div>
-          <button type="button" onClick={clearPlan}>Clear saved plan</button>
+          <Link className="text-link" href="/plans">เปิดแผนทั้งหมด / Open plans</Link>
+          <button type="button" onClick={clearPlan}>ล้างแผน</button>
         </section>
       </aside>
     </main>
