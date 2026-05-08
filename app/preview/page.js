@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 const profiles = {
   spark: {
@@ -13,7 +13,7 @@ const profiles = {
   mist: {
     title: "ธูติหมอกนุ่ม",
     tone: "อย่าเร่งฉัน เดี๋ยวฉันกลับมาเอง",
-    encourage: "ลดเสียงทุกอย่างลงก่อน ใจไม่ต้องรีบเก่ง",
+    encourage: "ลดเสียงทุกอย่างลงก่อน ไม่ต้องรีบเก่ง",
     color: "mist"
   },
   sprout: {
@@ -24,20 +24,20 @@ const profiles = {
   },
   water: {
     title: "ธูติน้ำใจ",
-    tone: "ตั้งชื่อมันก่อน มันจะเล็กลง",
-    encourage: "นี่คือ urge ไม่ใช่ตัวคุณทั้งหมด เรียกชื่อมัน แล้วค่อยขยับ",
+    tone: "ค่อยๆ รู้ทัน แล้วค่อยเลือก",
+    encourage: "แค่รู้ว่าตอนนี้ใจเป็นอะไร ก็ช่วยให้ค่อยๆ ไปต่อได้",
     color: "water"
   },
   wind: {
     title: "ธูติลมเย็น",
-    tone: "ถ้าเกินหนึ่งปุ่ม ฉันหาย",
-    encourage: "ใช้ทางสั้นสุด ปุ่มเดียว ก้าวเดียว พอสำหรับตอนนี้",
+    tone: "เอาให้ง่ายไว้ก่อน",
+    encourage: "ไม่ต้องทำหลายอย่าง เอาแค่ก้าวที่ไหวตอนนี้ก็พอ",
     color: "wind"
   },
   light: {
     title: "ธูติแสงดาว",
     tone: "ไม่ต้องแก้ แค่อยู่ด้วย",
-    encourage: "ขอคนอยู่ด้วยได้ ไม่ต้องอธิบายเก่ง แค่ไม่อยู่คนเดียว",
+    encourage: "พูดไม่เก่ง แต่จะอยู่เป็นเพื่อนนะ",
     color: "light"
   }
 };
@@ -46,29 +46,28 @@ const stages = [
   {
     id: "now",
     label: "ตอนนี้",
-    action: "หยุดเพิ่มแรงกด",
-    line: "ธูติยืนข้างๆ ก่อน ยังไม่ต้องพิสูจน์อะไร"
+    action: "วางแรงกดลงก่อน",
+    line: "ธูติอยู่ข้างๆ เงียบๆ ไม่ต้องรีบอธิบาย ไม่ต้องรีบร้อน"
   },
   {
     id: "10mins",
     label: "10 นาที",
-    action: "ทำหนึ่งก้าวที่ปลอดภัยขึ้น",
-    line: "ช่องว่างเล็กๆ เริ่มกลับมา คุณมีสิทธิ์เลือกอีกครั้ง"
+    action: "เลือกก้าวเล็กที่ปลอดภัยกว่า",
+    line: "แค่มีช่องว่างนิดเดียวระหว่าง แรงกระตุ้น กับการตอบสนอง คุณก็เริ่มมีทางเลือกแล้ว"
   },
   {
     id: "today",
     label: "วันนี้",
-    action: "บันทึกสิ่งที่ช่วยได้",
-    line: "ไม่ต้องเก็บคำสารภาพ เก็บแค่วิธีที่พาคุณรอด"
+    action: "เก็บสิ่งที่ช่วยไว้เบาๆ",
+    line: "ไม่ต้องทบทวนทุกอย่าง เก็บแค่วิธีเล็กๆ ที่พาคุณผ่านช่วงนั้นมาได้"
   },
   {
     id: "7days",
     label: "7 วัน",
-    action: "เห็นแพทเทิร์นเบาๆ",
-    line: "คุณไม่ได้กลายเป็นคนใหม่ แค่มีธูติที่รู้ทางกลับมากขึ้น"
+    action: "ค่อยๆ เห็นทางกลับของตัวเอง",
+    line: "แค่รู้มากขึ้นว่าเวลาใจหลุด จะพาตัวเองกลับมายังไง"
   }
 ];
-
 function getStoredSpirit() {
   try {
     const raw = window.sessionStorage.getItem("urgeshift-user-context");
@@ -92,8 +91,6 @@ export default function PreviewPage() {
   const profile = profiles[spirit];
   const currentStage = stages[stage];
   const imagePath = `/spirits/${spirit}_${currentStage.id}.png`;
-
-  const progress = useMemo(() => `${(stage / (stages.length - 1)) * 100}%`, [stage]);
 
   function changeStage(nextStage) {
     setStage(Number(nextStage));
@@ -147,18 +144,6 @@ export default function PreviewPage() {
               </button>
             ))}
           </div>
-          <div className="timebar-track">
-            <div style={{ width: progress }} />
-          </div>
-          <input
-            className="timebar-input"
-            type="range"
-            min="0"
-            max={stages.length - 1}
-            value={stage}
-            onChange={(event) => changeStage(event.target.value)}
-            aria-label="ปรับช่วงเวลา"
-          />
         </section>
       </section>
     </main>

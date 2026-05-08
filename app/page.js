@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import BrandHeader from "./components/BrandHeader";
 import ContextPanel from "./components/ContextPanel";

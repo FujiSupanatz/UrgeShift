@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 const traits = ["spark", "mist", "sprout", "water", "wind", "light"];
 
 const traitLabels = {
-  spark: "ไฟฟ้า",
+  spark: "ไวไฟ",
   mist: "หมอกนุ่ม",
   sprout: "ต้นกล้า",
   water: "น้ำใจ",
@@ -98,8 +98,8 @@ const results = {
   water: {
     title: "ธูติน้ำใจ",
     oneLine: "เรียกชื่อมันเบาๆ แล้วค่อยไปต่อ",
-    share: "ธูติประจำตัวของฉันคือ ธูติน้ำใจ: บางทีแค่รู้ว่าใจรู้สึกอะไร เสียงข้างในก็เบาลงนิดหนึ่ง",
-    card: "เหมาะกับ reflection สั้นๆ: นี่คือเครียด นี่คือเหงา นี่คือเหนื่อย แล้วค่อยเลือกก้าวถัดไป",
+    share: "ธูติประจำตัวของฉันคือ ธูติน้ำใจ: แค่รู้ทันว่าใจตอนนี้เป็นอะไร บางอย่างก็เบาลงเองนิดหนึ่ง",
+    card: "เหมาะกับการค่อยๆ รู้ทันใจแบบสั้นๆ: นี่คือเครียด นี่คือเหงา นี่คือเหนื่อย แล้วค่อยเลือกก้าวถัดไป",
     llm: "User responds best to brief emotional labeling and gentle meaning-making. Keep reflection short, validating, and followed by one small action.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, water-heart spirit, small reflective gem, warm cream and teal, compassionate gaze, helps name feelings softly, paper-grain texture, Thai contemporary illustration, no text, mobile app result card"
   },
@@ -107,8 +107,8 @@ const results = {
   wind: {
     title: "ธูติลมเย็น",
     oneLine: "ให้ง่ายไว้ก่อน ใจจะได้ไม่ถอย",
-    share: "ธูติประจำตัวของฉันคือ ธูติลมเย็น: ตอนใจล้า ทางเลือกที่ง่ายที่สุดอาจเป็นทางที่ช่วยที่สุด",
-    card: "เหมาะกับ one-tap flows, ค่าเริ่มต้น, saved plans, และคำตอบสำเร็จรูปที่ไม่ต้องฝืนคิด",
+    share: "ธูติประจำตัวของฉันคือ ธูติลมเย็น: ตอนใจล้า แค่มีทางที่ง่ายพอให้ทำไหว ก็ช่วยได้มากแล้ว",
+    card: "เหมาะกับทางเลือกสั้นๆ กดครั้งเดียว ใช้ค่าเริ่มต้นได้เลย และคำตอบที่ไม่ต้องฝืนคิดเยอะ",
     llm: "User has low tolerance for friction during distress. Use defaults, chips, one-tap choices, and avoid open-ended questions unless necessary.",
     imagePrompt: "Original Thai guardian spirit mascot for urge interruption app, wind spirit, tiny guide with folded-paper arrow cloak, soft orange accent, fast but gentle, minimal friction theme, caring expression, paper-grain texture, Thai contemporary illustration, no text, mobile app result card"
   },
