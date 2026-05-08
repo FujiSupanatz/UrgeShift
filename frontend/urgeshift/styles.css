@@ -127,8 +127,8 @@ a {
 
 .brand-row h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.1rem, 5vw, 5.7rem);
-  line-height: 0.92;
+  font-size: clamp(1.7rem, 3.6vw, 4rem);
+  line-height: 0.96;
   margin: 0;
   max-width: 12ch;
   letter-spacing: 0;
@@ -408,8 +408,8 @@ a {
   max-width: 11ch;
   margin: 0 0 16px;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 9vw, 7rem);
-  line-height: 0.88;
+  font-size: clamp(2.1rem, 5.8vw, 4.8rem);
+  line-height: 0.92;
   letter-spacing: 0;
 }
 
@@ -655,8 +655,8 @@ a {
 .quiz-hero h1 {
   max-width: 9ch;
   margin: 0 0 16px;
-  font-size: clamp(3rem, 10vw, 7.2rem);
-  line-height: 0.88;
+  font-size: clamp(2.2rem, 6.2vw, 5rem);
+  line-height: 0.92;
 }
 
 .quiz-hero p:last-of-type {
@@ -760,8 +760,8 @@ a {
 
 .result-card h1 {
   margin: 0;
-  font-size: clamp(3rem, 10vw, 7rem);
-  line-height: 0.88;
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+  line-height: 0.92;
 }
 
 .result-card h2 {
@@ -1048,8 +1048,8 @@ a {
 
 .plans-header h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 7vw, 5.6rem);
-  line-height: 0.92;
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 0.95;
   margin: 0 0 12px;
 }
 
