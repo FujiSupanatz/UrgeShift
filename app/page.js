@@ -8,6 +8,7 @@ import PhoneShell from "./components/PhoneShell";
 import SavedPlanPanel from "./components/SavedPlanPanel";
 import SessionScreen from "./components/SessionScreen";
 import StateBoard from "./components/StateBoard";
+import { fetchBuddyDraft, recommendShift } from "./lib/shiftApi";
 import { actions, buddyDraft, crumbSteps, normalize } from "./lib/urgeshift";
 
 export default function Home() {
@@ -23,8 +24,9 @@ export default function Home() {
   const [buddyVisible, setBuddyVisible] = useState(false);
   const [saveVisible, setSaveVisible] = useState(false);
   const [planPreview, setPlanPreview] = useState("");
-  const [savedPlan, setSavedPlan] = useState("No plan saved yet.");
+  const [savedPlan, setSavedPlan] = useState("No current session plan yet.");
   const [copyText, setCopyText] = useState("Copy draft");
+  const [buddyDraftText, setBuddyDraftText] = useState(buddyDraft);
   const [currentContext, setCurrentContext] = useState({
     name: "Mint",
     place: "หน้าร้านสะดวกซื้อ กรุงเทพฯ",
@@ -35,11 +37,6 @@ export default function Home() {
     if (crumbStep === null) return null;
     return crumbSteps[crumbStep] ?? null;
   }, [crumbStep]);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem("urgeshift-plan");
-    if (stored) setSavedPlan(stored);
-  }, []);
 
   useEffect(() => {
     if (!active || seconds === 0) return undefined;
@@ -88,31 +85,42 @@ export default function Home() {
     if (step >= crumbSteps.length) applyAction(actions.water);
   }
 
-  function showBuddyBridge() {
+  async function showBuddyBridge() {
+    setBuddyDraftText(await fetchBuddyDraft(buddyDraft));
     setBuddyVisible(true);
     setMode("buddy bridge");
   }
 
-  function showHarmReduction() {
-    applyAction(actions.harm);
+  async function showHarmReduction() {
+    const result = await recommendShift(
+      {
+        event: "anyway",
+        urge,
+        energy,
+        blocker,
+        mode
+      },
+      actions.harm
+    );
+    applyAction(result.action || actions.harm);
     setCrumbStep(null);
     setMode("harm-reduction mode");
   }
 
-  function selectCrumb(key, value) {
+  async function selectCrumb(key, value) {
     const nextValue = normalize(value);
     if (key === "urge") setUrge(nextValue);
     if (key === "energy") setEnergy(nextValue);
     if (key === "blocker") setBlocker(nextValue);
 
     if (value.includes("Need person")) {
-      showBuddyBridge();
+      await showBuddyBridge();
       return;
     }
 
     if (value.includes("Still want it")) {
       setBlocker("still want it");
-      showHarmReduction();
+      await showHarmReduction();
       return;
     }
 
@@ -120,7 +128,7 @@ export default function Home() {
     showCrumbs(nextStep);
   }
 
-  function handleEscape(action) {
+  async function handleEscape(action) {
     if (!active && action !== "stop") return;
 
     if (action === "done") {
@@ -130,21 +138,29 @@ export default function Home() {
 
     if (action === "too-hard") {
       setBlocker("too hard");
-      applyAction(actions.downshift);
+      const result = await recommendShift(
+        { event: "too-hard", urge, energy, blocker: "too hard", mode },
+        actions.downshift
+      );
+      applyAction(result.action || actions.downshift);
       showCrumbs(0);
     }
 
     if (action === "different") {
       setBlocker("wrong vibe");
-      applyAction(actions.different);
+      const result = await recommendShift(
+        { event: "different", urge, energy, blocker: "wrong vibe", mode },
+        actions.different
+      );
+      applyAction(result.action || actions.different);
       showCrumbs(0);
     }
 
-    if (action === "person") showBuddyBridge();
+    if (action === "person") await showBuddyBridge();
 
     if (action === "anyway") {
       setBlocker("still want it");
-      showHarmReduction();
+      await showHarmReduction();
     }
 
     if (action === "stop") {
@@ -161,27 +177,13 @@ export default function Home() {
   }
 
   function savePlan() {
-    const plans = JSON.parse(window.localStorage.getItem("urgeshift-plans") || "[]");
-    const nextPlans = [
-      {
-        id: Date.now(),
-        text: planPreview,
-        cadence: "daily",
-        createdAt: new Date().toISOString()
-      },
-      ...plans
-    ];
-    window.localStorage.setItem("urgeshift-plans", JSON.stringify(nextPlans));
-    window.localStorage.setItem("urgeshift-plan", planPreview);
     setSavedPlan(planPreview);
     setSaveVisible(false);
-    setSessionStatus("plan saved");
+    setSessionStatus("session plan ready");
   }
 
   function clearPlan() {
-    window.localStorage.removeItem("urgeshift-plan");
-    window.localStorage.removeItem("urgeshift-plans");
-    setSavedPlan("No plan saved yet.");
+    setSavedPlan("No current session plan yet.");
   }
 
   function updateContext(field, value) {
@@ -193,7 +195,7 @@ export default function Home() {
 
   async function copyBuddy() {
     try {
-      await navigator.clipboard.writeText(buddyDraft);
+      await navigator.clipboard.writeText(buddyDraftText);
       setCopyText("Copied");
     } catch {
       setCopyText("Select text");
@@ -218,6 +220,7 @@ export default function Home() {
               currentCrumb={currentCrumb}
               mode={mode}
               buddyVisible={buddyVisible}
+              buddyDraft={buddyDraftText}
               saveVisible={saveVisible}
               planPreview={planPreview}
               copyText={copyText}

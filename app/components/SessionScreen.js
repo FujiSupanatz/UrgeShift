@@ -1,10 +1,11 @@
-import { buddyDraft, harmReductionMoves } from "../lib/urgeshift";
+import { harmReductionMoves } from "../lib/urgeshift";
 
 export default function SessionScreen({
   currentAction,
   currentCrumb,
   mode,
   buddyVisible,
+  buddyDraft,
   saveVisible,
   planPreview,
   copyText,
@@ -87,8 +88,8 @@ export default function SessionScreen({
 
       {saveVisible ? (
         <div className="save-panel">
-          <p className="tiny-label">บันทึกสิ่งที่ช่วยได้</p>
-          <h3>บันทึกเป็นแผน 10 นาทีไหม?</h3>
+          <p className="tiny-label">แผนสำหรับรอบนี้</p>
+          <h3>เก็บไว้ใช้ระหว่าง session นี้ไหม?</h3>
           <p>{planPreview}</p>
           <div className="panel-actions">
             <button type="button" onClick={onSavePlan}>บันทึกแผน</button>
