@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UrgeShift MVP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="stage" data-state="idle">
+      <section class="left-pane" aria-label="UrgeShift session">
+        <div class="brand-row">
+          <div class="mark" aria-hidden="true">
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">UrgeShift</p>
+            <h1>One tap between urge and regret.</h1>
+          </div>
+        </div>
+
+        <div class="phone-shell" aria-live="polite">
+          <div class="status-bar">
+            <span>Private session</span>
+            <span id="sessionStatus">not started</span>
+          </div>
+
+          <section id="idleScreen" class="screen active">
+            <div class="promise">
+              <p class="tiny-label">No login. No typing. No confession.</p>
+              <h2>When willpower goes offline, do not explain. Shift.</h2>
+            </div>
+            <button id="shiftNow" class="shift-button" type="button">
+              <span>Shift Now</span>
+              <small>start first move</small>
+            </button>
+            <p class="privacy-note">
+              Demo stores only saved plans in this browser. Raw urge text is not saved.
+            </p>
+          </section>
+
+          <section id="sessionScreen" class="screen">
+            <div class="timer-band">
+              <div>
+                <span class="tiny-label">First 90 seconds</span>
+                <strong id="timer">01:30</strong>
+              </div>
+              <div class="pulse-ring" aria-hidden="true"></div>
+            </div>
+
+            <article class="action-card">
+              <p class="tiny-label" id="actionMode">No-context first move</p>
+              <h2 id="actionText">Move 20 steps away from where you are.</h2>
+              <p id="actionSubtext">No need to decide anything yet.</p>
+            </article>
+
+            <div id="escapeHatches" class="button-grid" aria-label="Action responses">
+              <button type="button" data-action="done">Done</button>
+              <button type="button" data-action="too-hard">Too hard</button>
+              <button type="button" data-action="different">Different</button>
+              <button type="button" data-action="person">I need a person</button>
+              <button type="button" data-action="anyway">I'll do it anyway</button>
+              <button type="button" data-action="stop">Stop</button>
+            </div>
+
+            <div id="crumbPanel" class="crumb-panel hidden">
+              <p class="tiny-label" id="crumbPrompt">What kind of urge?</p>
+              <div id="crumbOptions" class="chip-row"></div>
+            </div>
+
+            <div id="buddyPanel" class="buddy-panel hidden">
+              <p class="tiny-label">Buddy Bridge - draft only</p>
+              <textarea id="buddyDraft" readonly></textarea>
+              <div class="panel-actions">
+                <button id="copyBuddy" type="button">Copy draft</button>
+                <button id="closeBuddy" type="button">Keep shifting</button>
+              </div>
+            </div>
+
+            <div id="savePanel" class="save-panel hidden">
+              <p class="tiny-label">Save what helped</p>
+              <h3>Save this as your 10-minute plan?</h3>
+              <p id="planPreview"></p>
+              <div class="panel-actions">
+                <button id="savePlan" type="button">Save plan</button>
+                <button id="skipSave" type="button">Not now</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="right-pane" aria-label="Demo controls and state">
+        <section class="demo-brief">
+          <p class="tiny-label">Demo persona</p>
+          <h2>Mint, 27, Bangkok. 10:45 PM. Near convenience store.</h2>
+          <p>
+            Stressful workday. Craving 8/10. Low energy. Does not want to explain.
+          </p>
+        </section>
+
+        <section class="state-board">
+          <p class="tiny-label">Context Crumbs</p>
+          <dl>
+            <div>
+              <dt>Urge</dt>
+              <dd id="stateUrge">unknown</dd>
+            </div>
+            <div>
+              <dt>Energy</dt>
+              <dd id="stateEnergy">unknown</dd>
+            </div>
+            <div>
+              <dt>Blocker</dt>
+              <dd id="stateBlocker">none</dd>
+            </div>
+            <div>
+              <dt>Mode</dt>
+              <dd id="stateMode">waiting</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="manual-signal">
+          <p class="tiny-label">Optional typed signal</p>
+          <label for="freeSignal">Use for crisis gate / low-readiness demo</label>
+          <div class="signal-row">
+            <input
+              id="freeSignal"
+              type="text"
+              autocomplete="off"
+              placeholder="e.g. I'm going to drink anyway"
+            />
+            <button id="sendSignal" type="button">Send</button>
+          </div>
+          <p id="signalHint">
+            Try: "I'm going to drink anyway" or crisis-like wording.
+          </p>
+        </section>
+
+        <section class="saved-plan">
+          <p class="tiny-label">Saved plan</p>
+          <div id="savedPlanText">No plan saved yet.</div>
+          <button id="clearPlan" type="button">Clear saved plan</button>
+        </section>
+      </aside>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
